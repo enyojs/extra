@@ -153,14 +153,6 @@ enyo.kind({
 	
 	// Call finish() to indicate success, or finish("<reason-message>") to indicate failure.
 	finish: function(inMessage) {
-		var that=this;
-		var args = arguments;
-		window.setTimeout(function() {
-			that.reallyFinish.apply(that, args);
-		}, 0);
-	},
-	
-	reallyFinish: function(inMessage) {
 		
 		// If finish has been called before, then we ignore it 
 		// unless we passed previously and now we're failing.
@@ -204,6 +196,7 @@ enyo.kind({
 		}
 		
 		this.clearTimer();
+		this.doFinish(this.results);	// send results to owner
 		
 		// Execute afterEach method, if we haven't already.
 		if(this.afterEach) {
@@ -216,14 +209,11 @@ enyo.kind({
 			this.afterEach = null; // so we don't try again
 		}
 		
-		this.doFinish(this.results);	// send results to owner
-		
 	},
 	
 	childTestBegun: function(inSender) {
 		// Pass child test begin event up, with the test name.
 		// This can be used to trigger UI.
-		this.triggeredNextTest = false;
 		this.doBegin(inSender.name);
 	},
 	childTestFinished: function(inSender, inResults) {
@@ -231,10 +221,8 @@ enyo.kind({
 		this.doFinish(inResults);
 		
 		// We do not destroy the child component yet, in case it calls finish() again later with a failure... in that case, we still fail it.
-		if(!this.triggeredNextTest) {
-			this.triggeredNextTest = true;
-			enyo.asyncMethod(this, "next");
-		}
+		
+		this.next();
 	}
 	
 });

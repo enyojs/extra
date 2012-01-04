@@ -37,7 +37,9 @@ enyo.easing = {
 	},
 	quadInOut: function(n){
 		n = n * 2;
-		if(n < 1){ return Math.pow(n, 2) / 2; }
+		if (n < 1) {
+			return Math.pow(n, 2) / 2;
+		}
 		return -1 * ((--n) * (n - 2) - 1) / 2;
 	},
 	linear: function(n) {

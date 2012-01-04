@@ -29,7 +29,7 @@ enyo.kind({
 		var s = this.path.indexOf(n);
 		var p = this.path.slice(s + n.length);
 		this.addToIndex(p, this);
-		console.log(p);
+		//console.log(p);
 		//
 		this.indexObjects();
 	},
