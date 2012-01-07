@@ -9,13 +9,13 @@ enyo.kind({
 		onFinishAll: ""
 	},
 	components: [
-		{name: "title", className: "enyo-testcase-title"},
-		{name: "group", className: "enyo-testcase-group", components: []}
+		{name: "title", classes: "enyo-testcase-title"},
+		{name: "group", classes: "enyo-testcase-group", components: []}
 	],
 	timeout: 3000,
-	className: "enyo-testcase",
 	create: function(callback) {
 		this.inherited(arguments);
+		this.addClasses("enyo-testcase");
 		this.$.title.setContent(this.name);
 	},
 	initComponents: function() {
@@ -26,7 +26,7 @@ enyo.kind({
 		this.$.testSuite.runAllTests();
 	},
 	testBegun: function(inSender, testName) {
-		this.$.group.createComponent({name: testName, className: "enyo-testcase-running", content: testName + ": running"}).render();
+		this.$.group.createComponent({name: testName, classes: "enyo-testcase-running", content: testName + ": running"}).render();
 	},
 	suiteFinished: function() {
 		this.doFinishAll();
