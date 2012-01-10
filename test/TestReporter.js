@@ -15,7 +15,7 @@ enyo.kind({
 	timeout: 3000,
 	create: function(callback) {
 		this.inherited(arguments);
-		this.addClasses("enyo-testcase");
+		this.addClass("enyo-testcase");
 		this.$.title.setContent(this.name);
 	},
 	initComponents: function() {
