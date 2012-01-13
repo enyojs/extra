@@ -2,7 +2,6 @@ enyo.kind({
 	name: "enyo.YouTube",
 	kind: "VBox",
 	published: {
-		videoId: "Ip7QZPw04Ks",
 		videoId: ""
 	},
 	statics: {
@@ -16,21 +15,7 @@ enyo.kind({
 		{kind: "Signals", onApiReady: "apiReadySignal"},
 		{name: "video", height: "fill", style: "position: relative;"}
 	],
-	create: function() {
-		this.inherited(arguments);
-		if (!this.videoId) {
-			//this.setPlayerShowing(false);
-		}
-	},
-	rendered: function() {
-		this.inherited(arguments);
-		//this.createPlayer();
-		//this.videoIdChanged();
-	},
 	apiReadySignal: function() {
-		this.log();
-		//enyo.YouTube.apiPending = false;
-		//enyo.remove(this, enyo.YouTube.pendingPlayers);
 		this.createPlayer();
 	},
 	createPlayer: function() {
@@ -76,19 +61,7 @@ enyo.kind({
 	},
 	setPlayerShowing: function(inShowing) {
 		this.$.video.setShowing(inShowing);
-		//this.$.scrim.setShowing(!inShowing);
 	},
-	/*
-	windowActivated: function() {
-		if (this.videoId && this.player) {
-			this.setPlayerShowing(true);
-		}
-	},
-	windowDeactivated: function() {
-		this.setPlayerShowing(false);
-		this.pause();
-	},
-	*/
 	play: function() {
 		if (this.player) {
 			this.player.playVideo();

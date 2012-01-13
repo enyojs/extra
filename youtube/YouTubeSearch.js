@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "YouTubeSearch",
+	name: "enyo.YouTubeSearch",
 	kind: "Async",
 	url: "http://gdata.youtube.com/feeds/api/videos/",
 	search: function(inSearchText, inRelated) {
@@ -15,7 +15,7 @@ enyo.kind({
 		for (var i=0, l; v=videos[i]; i++) {
 			l = v.id.$t;
 			v.id = l.substring(l.lastIndexOf("/")+1);
-			//v.title = v.title.$t;
+			v.title = v.title.$t;
 			v.thumbnail = v.media$group.media$thumbnail[1].url;
 		}
 		return videos;
