@@ -63,7 +63,7 @@ enyo.kind({
 			content += "<br/>" + results.logs.join("<br/>");
 		}
 		info.setContent(content);
-		info.setClassAttribute("enyo-testcase-" + (results.passed ? "passed" : "failed"));
+		info.setClasses("enyo-testcase-" + (results.passed ? "passed" : "failed"));
 	}
 });
 
