@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "enyo.YouTube",
-	kind: "VBox",
+	kind: "Control",
 	published: {
 		videoId: ""
 	},
@@ -32,7 +32,7 @@ enyo.kind({
 	},
 	components: [
 		{kind: "Signals", onApiReady: "apiReadySignal"},
-		{name: "video", height: "fill", style: "position: relative;"}
+		{name: "video", classes: "enyo-fit"}
 	],
 	apiReadySignal: function() {
 		this.createPlayer();
@@ -53,6 +53,7 @@ enyo.kind({
 			var iframe = this.$.video.hasNode().firstChild;
 			if (iframe) {
 				iframe.style.position = "absolute";
+				this.reflow();
 			}
 		}
 	},
