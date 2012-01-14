@@ -15,7 +15,7 @@ enyo.kind({
 	timeout: 3000,
 	create: function(callback) {
 		this.inherited(arguments);
-		this.addClasses("enyo-testcase");
+		this.addClass("enyo-testcase");
 		this.$.title.setContent(this.name);
 	},
 	initComponents: function() {
@@ -63,6 +63,7 @@ enyo.kind({
 			content += "<br/>" + results.logs.join("<br/>");
 		}
 		info.setContent(content);
-		info.setClassName("enyo-testcase-" + (results.passed ? "passed" : "failed"));
+		info.setClassAttribute("enyo-testcase-" + (results.passed ? "passed" : "failed"));
 	}
 });
+
