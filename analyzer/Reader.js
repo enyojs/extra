@@ -21,9 +21,9 @@ enyo.kind({
 		}
 	},
 	loadModule: function(inUrl) {
-		enyo.xhrGet({
+		enyo.xhr.request({
 			url: inUrl,
-			load: enyo.bind(this, "moduleLoaded", inUrl)
+			callback: enyo.bind(this, "moduleLoaded", inUrl)
 		});
 	},
 	moduleLoaded: function(inUrl, d) {
