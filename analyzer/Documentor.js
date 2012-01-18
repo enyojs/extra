@@ -51,21 +51,42 @@ enyo.kind({
 						}
 						group = p.group || group;
 					}
-					/*
-					if (m) {
-						comment.push(m[1] ? m[1] : m[2] + "\n");
-					}
-					*/
 				default:
 					break;
 			}
 		}
 		if (comment.length) {
-			result.comment = comment.join(" ");
+			result.comment = this.joinComment(comment);
 			//console.log(result.comment);
 			comment = [];
 		}
 		return result;
+	},
+	joinComment: function(inComment) {
+		if (!inComment || !inComment.length) {
+			return "";
+		}
+		var comment = inComment.join(" ");
+		// Remove leading indent from comment
+		// so markdown spacing is intact.
+		// Assumes first non-empty line in comment is block-left.
+		var indent = 0;
+		var lines = comment.split(/\r?\n/);
+		for (var i=0, l; (l=lines[i]) != null; i++) {
+			if (l.length > 0) {
+				indent = l.search(/\S/);
+				if (indent < 0) {
+					indent = l.length;
+				}
+				break;
+			}
+		}
+		if (indent) {
+			for (var i=0, l; (l=lines[i]) != null; i++) {
+				lines[i] = l.slice(indent);
+			}
+		}
+		return lines.join("\n");
 	},
 	makeFunction: function(inName, inArgs, inComment, inGroup) {
 		return {
@@ -114,7 +135,7 @@ enyo.kind({
 	makeThing: function (inType, inNodes, inComment, inGroup) {
 		var obj = this.parseProperties(name, inNodes);
 		obj.type = inType;
-		obj.comment = inComment.join(' ');
+		obj.comment = this.joinComment(inComment);
 		obj.group = inGroup;
 		return obj;
 	},
@@ -230,37 +251,7 @@ enyo.kind({
 		}
 		return inNode.token;
 	}
-	/*,
-	getGroups: function (inParsed) {
-		function sortFunc(a, b) {
-			return (a.name > b.name ? 1 : -1);
-		}
-		//
-		function processGroups(inProperties, inPropMethod) {
-			for (var i = 0, g = null, p; (p = inProperties[i]); i++) {
-				if (g != p.group && !(p.group in inPropMethod))
-					inPropMethod[p.group] = [];
-				inPropMethod[p.group].push(p);
-				g = p.group;
-			}
-			// alpha sort on name
-			for (var i in inPropMethod)
-				inPropMethod[i].sort(sortFunc);
-		}
-		//
-		function processType(inType) {
-			for (var i = 0, c, groups; (c = inType[i]); i++) {
-				groups = c.properties.groups = { props: {}, methods: {} };
-				processGroups(c.properties.props, groups.props);
-				processGroups(c.properties.methods, groups.methods);
-			}
-		}
-		//
-		processType(inParsed.classes);
-		processType(inParsed.widgets);
-	}
-	*/
-})
+});
 
 stripQuotes = function(inString) {
 	var c0 = inString.charAt(0);
