@@ -91,7 +91,7 @@ enyo.kind({
 	makeFunction: function(inName, inArgs, inComment, inGroup) {
 		return {
 			type: 'function',
-			comment: inComment.join(' '),
+			comment: this.joinComment(inComment),
 			group: inGroup,
 			name: inName,
 			args: this.composeAssociation(inArgs)
@@ -205,7 +205,7 @@ enyo.kind({
 					methods.map[name] = {
 						name: name,
 						args: this.composeAssociation(inProps[++i]),
-						comment: comment.join(' '),
+						comment: this.joinComment(comment),
 						group: group
 					};
 					// function body is also part of this declaration
@@ -216,7 +216,7 @@ enyo.kind({
 					var o = {
 						name: name,
 						//value: t[1],
-						comment: comment.join(' '),
+						comment: this.joinComment(comment),
 						group: group
 					};
 					if (nextP && nextP.kind == 'block') {

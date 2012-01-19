@@ -15,25 +15,25 @@ enyo.kind({
 	nextModule: function() {
 		var m = this.loader.modules[this.moduleIndex++];
 		if (m) {
-			this.loadModule(m.path);
+			this.loadModule(m);
 		} else {
 			this.modulesFinished();
 		}
 	},
-	loadModule: function(inUrl) {
+	loadModule: function(inModule) {
 		enyo.xhr.request({
-			url: inUrl,
-			callback: enyo.bind(this, "moduleLoaded", inUrl)
+			url: inModule.path,
+			callback: enyo.bind(this, "moduleLoaded", inModule)
 		});
 	},
-	moduleLoaded: function(inUrl, d) {
-		if (d && d.length) {
-			this.addModule(inUrl, d);
-		}
+	moduleLoaded: function(inModule, inCode) {
+		this.addModule(inModule, inCode);
 		this.nextModule();
 	},
-	addModule: function(inPath, inCode) {
-		this.modules[inPath] = new Module({name: inPath, path: inPath, source: inCode});
+	addModule: function(inModule, inCode) {
+		if (inCode && inCode.length) {
+			this.modules[inModule.path] = new Module({name: inModule.path, path: inModule.path, rawPath: inModule.rawPath, packageName: inModule.packageName, source: inCode});
+		}
 	},
 	modulesFinished: function() {
 		this.doFinish();
