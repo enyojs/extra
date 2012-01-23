@@ -179,23 +179,21 @@ enyo.kind({
 			logs: this.logMessages
 		};
 		
-		if(inMessage) {
-			
-			
-			if((typeof inMessage) === "string") {	// In message could be a string...
+		if (inMessage) {
+			if ((typeof inMessage) === "string") { // In message could be a string...
 				this.results.message = inMessage;
-			} else if(inMessage.message !== undefined){	// ... or an exception ...
+			} else if (inMessage.message !== undefined) { // ... or an exception ...
 				this.results.message = inMessage.message;
 				this.results.exception = inMessage;
-			} else {	// ... or some other object ...
+			} else { // ... or some other object ...
 				this.results.message = inMessage.errorText || inMessage.toString();
 				this.results.failValue = inMessage;
 			}
 			
 			// Except for timeouts, make sure we have an exception so we can get a backtrace.
-			if(!this.results.exception && inMessage !== this.timeoutMessage) {
+			if (!this.results.exception && inMessage !== this.timeoutMessage) {
 				try {
-					throw new Error("sample exception");
+					throw new Error(inMessage);
 				} catch(e) {
 					this.results.exception = e;
 				}
