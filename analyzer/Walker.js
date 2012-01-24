@@ -5,7 +5,7 @@ enyo.kind({
 		verbose: false
 	},
 	events: {
-		onReport: "",
+		onProgress: "",
 		onFinish: ""
 	},
 	components: [
@@ -30,7 +30,7 @@ enyo.kind({
 		//enyo.depends(inSource);
 	},
 	walkReport: function(inAction, inName) {
-		this.doReport(inAction, inName);
+		this.doProgress(inAction, inName);
 	},
 	walkFinish: function() {
 		// we've read all the manifests and constructed our list of modules

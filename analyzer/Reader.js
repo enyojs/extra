@@ -32,7 +32,9 @@ enyo.kind({
 	},
 	addModule: function(inModule, inCode) {
 		if (inCode && inCode.length) {
-			this.modules[inModule.path] = new Module({name: inModule.path, path: inModule.path, rawPath: inModule.rawPath, packageName: inModule.packageName, source: inCode});
+			var module = new enyo.Documentor(inCode).results;
+			this.modules[inModule.path] = module; 
+			enyo.mixin(module, inModule);
 		}
 	},
 	modulesFinished: function() {
