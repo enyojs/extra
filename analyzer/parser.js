@@ -1,6 +1,7 @@
 //* @protected
 enyo.kind({
 	name: "enyo.parser.Base", 
+	kind: null,
 	i: 0,
 	constructor: function(inTokens) {
 		this.a = [];
