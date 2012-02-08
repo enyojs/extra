@@ -10,39 +10,37 @@ enyo.kind({
 	},
 	components: [
 		{name: "title", classes: "enyo-testcase-title"},
-		{name: "group", classes: "enyo-testcase-group", components: []}
+		{name: "group", classes: "enyo-testcase-group"}
 	],
+	classes: "enyo-testcase",
 	timeout: 3000,
-	create: function(callback) {
+	create: function() {
 		this.inherited(arguments);
-		this.addClass("enyo-testcase");
 		this.$.title.setContent(this.name);
 	},
 	initComponents: function() {
 		this.inherited(arguments);
-		this.createComponent({name: 'testSuite', kind: this.name, onBegin: "testBegun", onFinish: "updateTestDisplay", onFinishAll: "suiteFinished"});
+		this.createComponent({name: "testSuite", kind: this.name, onBegin: "testBegun", onFinish: "updateTestDisplay"});
 	},
 	runTests: function() {
 		this.$.testSuite.runAllTests();
 	},
-	testBegun: function(inSender, testName) {
-		this.$.group.createComponent({name: testName, classes: "enyo-testcase-running", content: testName + ": running"}).render();
-	},
-	suiteFinished: function() {
-		this.doFinishAll();
+	testBegun: function(inSender, inEvent) {
+		this.$.group.createComponent({name: inEvent.testName, classes: "enyo-testcase-running", content: inEvent.testName + ": running"}).render();
 	},
 	formatStackTrace: function(inStack) {
 		var stack = inStack.split("\n");
 		var out = [''];
 		for (var i=0, s; s=stack[i]; i++) {
-			if (s.indexOf("    at Object.do") == 0 || s.indexOf("    at Object.dispatchIndirectly") == 0 || s.indexOf("TestSuite.js") != -1) {
+			if (s.indexOf("    at Object.do") == 0 || s.indexOf("    at Object.dispatch") == 0 || s.indexOf("TestSuite.js") != -1) {
 				continue;
 			}
 			out.push(s);
 		}
 		return out.join("<br/>");
 	},
-	updateTestDisplay: function(inSender, results) {
+	updateTestDisplay: function(inSender, inEvent) {
+		var results = inEvent.results;
 		var e = results.exception;
 		var info = this.$.group.$[results.name];
 		var content = "<b>" + results.name + "</b>: " + (results.passed ? "PASSED" : results.message);
