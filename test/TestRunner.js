@@ -12,11 +12,9 @@ enyo.kind({
 		this.next();
 	},
 	next: function() {
-		var testKind = enyo.TestSuite.tests[this.index++];
-		if (testKind) {
-			testKind = testKind.prototype.kindName;
-			this.createComponent({name: testKind, kind:enyo.TestReporter, onFinishAll: "next"}).render();
-			this.$[testKind].runTests();
+		var test = enyo.TestSuite.tests[this.index++];
+		if (test) {
+			this.createComponent({name: test.prototype.kindName, kind: enyo.TestReporter, onFinishAll: "next"});
 		}
 	}
 });
