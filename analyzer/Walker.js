@@ -30,18 +30,20 @@ enyo.kind({
 		//enyo.depends(inSource);
 	},
 	walkReport: function(inAction, inName) {
-		this.doProgress(inAction, inName);
+		this.doProgress({action: inAction, name: inName});
 	},
 	walkFinish: function() {
 		// we've read all the manifests and constructed our list of modules
 		// now build a database by reading and analyzing each module
 		this.analyzeModules();
+		// we've handled this finish message, do not bubble it
+		return true;
 	},
 	analyzeModules: function() {
 		this.$.reader.loadModules(this.loader);
 	},
 	readerFinish: function() {
 		this.modules = this.$.reader.modules;
-		this.doFinish();
+		// this message will bubble
 	}
 });

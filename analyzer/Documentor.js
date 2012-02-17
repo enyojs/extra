@@ -1,6 +1,7 @@
 //* Translator converts parser output into a collection of documentation objects suitable for formatting.
 enyo.kind({
 	name: "enyo.Documentor",
+	kind: null,
 	// matches "/** [multi-line comment] */" and "//* single line comment"
 	commentRx: /\/\*\*([\s\S]*)\*\/|\/\/\*(.*)/m,
 	constructor: function (inSource) {

@@ -1,6 +1,7 @@
 //* @protected
 enyo.kind({
 	name: "enyo.lexer.Base",
+	kind: null,
 	constructor: function(inText) {
 		if (inText) {
 			this.start(inText);
