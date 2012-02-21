@@ -4,5 +4,7 @@ enyo.depends(
 	"runtime-machine.js",
 	"Documentor.js",
 	"Reader.js",
-	"Walker.js"
+	"Walker.js",
+	"InfoDb.js",
+	"PackageDb.js"
 );
