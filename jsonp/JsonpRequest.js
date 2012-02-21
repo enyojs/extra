@@ -63,7 +63,7 @@ enyo.kind({
 	// common case of inParams being an object, we'll add a argument named
 	// using the callbackName published property.
 	jsonp: function(inParams) {
-		var callbackFunctionName = "ENYO_JSONP_CALLBACK_" + 
+		var callbackFunctionName = "enyo_jsonp_callback_" + 
 			(enyo.JsonpRequest.nextCallbackID++);
 
 		var parts = this.url.split("?");
