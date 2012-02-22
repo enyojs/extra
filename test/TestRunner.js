@@ -14,7 +14,7 @@ enyo.kind({
 	next: function() {
 		var test = enyo.TestSuite.tests[this.index++];
 		if (test) {
-			this.createComponent({name: test.prototype.kindName, kind: enyo.TestReporter, onFinishAll: "next"});
+			this.createComponent({name: test.prototype.kindName, kind: enyo.TestReporter, onFinishAll: "next"}).render().runTests();
 		}
 	}
 });
