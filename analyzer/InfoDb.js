@@ -161,14 +161,16 @@ enyo.kind({
 		return info;
 	},
 	processKind: function(k) {
+		// FIXME: the default kind is only enyo.Control if 'dom' package is loaded, otherwise it's enyo.Component
+		var defaultKind = "enyo.Control";
 		// cook raw data
 		var info = {
 			name: k.name.value,
 			comment: k.comment,
 			type: k.type,
 			kind: true,
-			superKind: k.kind && (k.kind.value != "null") && k.kind.value
-			//superkinds: this.listSuperkinds(k)
+			// FIXME: the default constructor is only enyo.Control if 'dom' package is loaded, otherwise it's enyo.Component
+			superKind: k.kind ? (k.kind.value != "null" && k.kind.value) : defaultKind
 		};
 		// list properties with references
 		info.properties = this.listKindProperties(k, info);
