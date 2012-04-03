@@ -1,15 +1,49 @@
 enyo.kind({
 	name: "InfoDb",
 	kind: "Component",
-	dbify: function(inReaderModules) {
+	create: function() {
+		this.modules = [];
+		this.packages = [];
 		this.objects = [];
-		this.modules = this.buildModuleList(inReaderModules);
-		this.packages = this.buildPackageList(this.modules);
-		this.indexModuleObjects();
-		this.cookObjects();
-		this.indexInheritance();
-		this.indexAllProperties();
+		this.inherited(arguments);
+	},
+	dbify: function(inReaderModules) {
+		// mine data from module list
+		var data = this.modulesToObjects(inReaderModules);
+		// combine with existing db
+		this.modules = this.modules.concat(data.modules);
+		this.packages = this.packages.concat(data.packages);
+		this.objects = this.objects.concat(data.objects);
+		// add all property records to the objects array
+		this.indexAllProperties(data.objects);
+		// sort the object list by name
 		this.objects.sort(this.nameCompare);
+	},
+	modulesToObjects: function(inReaderModules) {
+		// extra module information into an (unmapped array)
+		var modules = this.buildModuleList(inReaderModules);
+		// iterate over modules to infer package information (unmapped array)
+		var packages = this.buildPackageList(modules);
+		// combine all module objects (ths module itself, and each of it's objects that has a name and type) into 'this.raw' array
+		this.indexModuleObjects(modules);
+		// process objects in 'this.raw' to make them easier to consume
+		var objects = this.cookObjects();
+		// to each cooked 'kind' record, add a list of superkinds and inherited properties
+		this.indexInheritance(objects);
+		return {
+			modules: modules,
+			packages: packages,
+			objects: objects
+		};
+	},
+	nameCompare: function(inA, inB) {
+		if (inA.name < inB.name) {
+			return -1;
+		}
+		if (inA.name > inB.name) {
+			return 1;
+		} 
+		return 0;
 	},
 	// return the subset of objects that are inType
 	listByType: function(inType) {
@@ -56,27 +90,32 @@ enyo.kind({
 	},
 	buildPackageList: function(inModules) {
 		var pkgs = {};
+		// for each module
 		for (var i=0, m, n, lc, p; m=inModules[i]; i++) {
 			// discover package name
 			n = (m.packageName || "unknown");
 			// bin by package name
 			lc = n.toLowerCase();
+			// create a package record, if needed
 			if (!pkgs[lc]) {
 				pkgs[lc] = {
 					packageName: n,
 					modules: []
 				}
 			}
+			// the package record for this module
 			p = pkgs[lc];
+			// store a reference to this module
 			p.modules.push(m);
 		}
+		// convert package map into array of named objects
 		return this.unmap(pkgs);
 	},
 	//
 	// combine all module objects into master array of raw objects
-	indexModuleObjects: function() {
+	indexModuleObjects: function(inModules) {
 		this.raw = [];
-		for (var i=0, m; m=this.modules[i]; i++) {
+		for (var i=0, m; m=inModules[i]; i++) {
 			this.indexModule(m);
 		}
 	},
@@ -98,6 +137,7 @@ enyo.kind({
 	},
 	// process raw data in each object into a form that's easier to consume
 	cookObjects: function() {
+		var objects = [];
 		for (var i=0, raw, cooked; raw=this.raw[i]; i++) {
 			// cook the raw data
 			cooked = this.cookObject(raw);
@@ -112,12 +152,13 @@ enyo.kind({
 				cooked.topic = cooked.name;
 			}
 			// store the cooked object in the master array
-			this.objects[i] = cooked;
+			objects[i] = cooked;
 			// store the cooked object in it's module
 			if (cooked.module) {
 				cooked.module.objects.push(cooked);
 			}
 		}
+		return objects;
 	},
 	// process a raw object based on it's type
 	cookObject: function(inObject) {
@@ -127,28 +168,15 @@ enyo.kind({
 		}
 		return inObject;
 	},
-	cook_kind: function(inObject) {
-		return this.processKind(inObject);
-	},
-	cook_object: function(inObject) {
-		return this.processObject(inObject);
-	},
-	cook_function: function(inObject) {
-		return this.processFunction(inObject);
-	},
-	cook_module: function(inObject) {
-		return this.processModule(inObject);
-	},
-	//
-	processModule: function(inModule) {
+	cook_module: function(inModule) {
 		inModule.topic = inModule.rawPath;
 		inModule.name = inModule.rawPath;
 		return inModule;
 	},
-	processFunction: function(inFunction) {
+	cook_function: function(inFunction) {
 		return inFunction;
 	},
-	processObject: function(o) {
+	cook_object: function(o) {
 		// cook raw data
 		var info = {
 			name: o.name,
@@ -160,7 +188,7 @@ enyo.kind({
 		info.properties = this.listKindProperties(o, info);
 		return info;
 	},
-	processKind: function(k) {
+	cook_kind: function(k) {
 		// FIXME: the default kind is only enyo.Control if 'dom' package is loaded, otherwise it's enyo.Component
 		var defaultKind = "enyo.Control";
 		// cook raw data
@@ -176,22 +204,21 @@ enyo.kind({
 		info.properties = this.listKindProperties(k, info);
 		return info;
 	},
-	listSuperkinds: function(inKind) {
-		var supers = [], kind = inKind;
-		while (kind && kind.superKind) {
-			supers.push(kind.superKind);
-			kind = this.findByName(kind.superKind);
-		}
-		return supers;
-	},
 	listKindProperties: function(inKind, inInfo) {
+		/*
 		// copy methods
 		var props = this.unmap(inKind.methods.map, "method");
 		// copy non-method properties
 		props = props.concat(this.unmap(inKind.properties.map, "property"));
-		// copy published properties
-		if (inKind.published && inKind.published.value.properties) {
-			props = props.concat(this.unmap(inKind.published.value.properties.map, "published"));
+		*/
+		var props = inKind.properties;
+		// append published properties
+		if (inKind.published && inKind.published.value) {
+			for (var i=0, p; p=inKind.published.value[i]; i++) {
+				p.published = true;
+				props.push(p);
+			}
+			//props = props.concat(this.unmap(inKind.published.value.properties.map, "published"));
 		}
 		for (var i=0, p; p=props[i]; i++) {
 			// convert group id to flag
@@ -203,25 +230,33 @@ enyo.kind({
 			// object type
 			p.type = p.method ? "method" : "property";
 		}
+		// sort by name property
 		props.sort(this.nameCompare);
 		return props;
 	},
-	nameCompare: function(inA, inB) {
-		if (inA.name < inB.name) {
-			return -1;
-		}
-		if (inA.name > inB.name) {
-			return 1;
-		} 
-		return 0;
-	},
-	indexInheritance: function() {
-		for (var i=0, o; o=this.objects[i]; i++) {
+	//
+	indexInheritance: function(inObjects) {
+		for (var i=0, o; o=inObjects[i]; i++) {
 			if (o.type == "kind") {
 				o.superkinds = this.listSuperkinds(o);
 				o.allProperties = this.listInheritedProperties(o);
 			}
 		}
+	},
+	listSuperkinds: function(inKind) {
+		var supers = [], kind = inKind;
+		while (kind && kind.superKind) {
+			var sk = kind.superKind;
+			kind = this.findByName(sk);
+			if (!kind) {
+				kind = this.findByName("enyo." + sk);
+				if (kind) {
+					sk = "enyo." + sk;
+				}
+			}
+			supers.push(sk);
+		}
+		return supers;
 	},
 	listInheritedProperties: function(inKind) {
 		var all = [], map = {};
@@ -259,13 +294,11 @@ enyo.kind({
 		// return the list
 		return all;
 	},
-	indexAllProperties: function() {
-		for (var i=0, o; o=this.objects[i]; i++) {
-			if (o.properties) {
-				enyo.forEach(o.properties, function(p) {
-					this.objects.push(p);
-				}, this);
-			}
+	indexAllProperties: function(inObjects) {
+		for (var i=0, o; o=inObjects[i]; i++) {
+			enyo.forEach(o.properties, function(p) {
+				this.objects.push(p);
+			}, this);
 		}
 	}
 });
