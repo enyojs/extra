@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+	<title>Analyzer Example</title>
+	<!-- -->
+	<script src="../../../../enyo/enyo.js" type="text/javascript"></script>
+	<!-- -->
+	<script src="../../analyzer/package.js" type="text/javascript"></script>
+</head>
+<body>
+	<script id="test">
+		function doh(x, y, z) {
+		}
+		if (false) {
+			var a = 3;
+		}
+		var x, y, z;
+		var foo = {
+			a: 3,
+			b: "flarn",
+			c: eyo.nop()
+		};
+	</script>
+	<script>
+		var s = document.getElementById("test");
+		console.log(s.text);
+		var tokens = new enyo.lexer.Js(s.text);
+		console.dir(tokens.r);
+		var nodes = new enyo.parser.Code(tokens).nodes;
+		console.dir(nodes);
+		var dump = function(inNodes) {
+			for (var i=0, n; n=inNodes[i]; i++){
+				document.write(n.kind);
+				if (n.token) {
+					document.write(" [<b>" + n.token + "</b>]");
+				}
+				document.write("<br>");
+				if (n.children) {
+					document.write("<blockquote>");
+					dump(n.children);
+					document.write("</blockquote>");
+				}
+			}
+		};
+		dump(nodes);
+	</script>
+</body>
+</html>

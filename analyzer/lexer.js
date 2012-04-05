@@ -71,7 +71,7 @@ enyo.kind({
 	kind:  enyo.lexer.Base,
 	symbols: "(){}[];,:<>+-",
 	operators: [ "++", "--", "+=", "-=", "==", "!=", "&&", "||", '"', "'", "=" ],
-	keywords: [ "function", "new", "return", "if", "while", "do", "break", "continue", "switch", "case", "var" ],
+	keywords: [ "function", "new", "return", "if", "else", "while", "do", "break", "continue", "switch", "case", "var" ],
 	buildPattern: function() {
 		// match an inline regex
 		//var rregex = "/[^*/](?:\\/|[^/])+?/";
@@ -161,11 +161,7 @@ enyo.kind({
 	},
 	doString: function() {
 		this.pushToken('string', this.m[0].length);
-	}/*,
-	doRegExp: function() {
-		console.log(this.m[0]);
-		this.pushToken('string', this.m[0].length);
-	}*/
+	}
 });
 
 enyo.lexer.Js = enyo.lexer.Code

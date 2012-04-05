@@ -9,7 +9,7 @@ enyo.kind({
 		this.lastToken = {};
 		this.nodes = inLexer && this.parse(inLexer.r);
 	},
-	// return AST generated from inLexer tokens
+	// return node-list generated from lexer tokens
 	parse: function(inTokens) {
 		// setup token stream
 		this.setTokens(inTokens);
@@ -19,10 +19,10 @@ enyo.kind({
 		var sentinel = {children: nodes.slice(0)};
 		// index the children and refer them back to parent
 		this.catalog(sentinel, sentinel.children);
-		// return AST
+		// return node list
 		return nodes;
 	},
-	// prepare the token stream
+	// prepare the token stream for iteration
 	setTokens: function(inTokens) {
 		// current index in the stream
 		this.i = 0;
@@ -42,14 +42,24 @@ enyo.kind({
 	},
 	// push a token onto the accumulator stack
 	pushToken: function(inT) {
+		//console.log("[" + inT.token + "]");
 		this.a.push(inT);
 	}
 });
 
+/*
+	This ad-hoc processor is barely a parser, it does minimal work taking
+	a token stream from an enyo.lexer and converting it into a node stream.
+
+	Mostly, the task is to collect grouped tokens into subnodes, namely:
+	associations "()", blocks "{}", and arrays "[]"
+
+	Whitespace is discarded.
+*/
 enyo.kind({
 	name: "enyo.parser.Code",
 	kind: enyo.parser.Base,
-	// process tokens into AST nodes
+	// process tokens into nodes
 	processTokens: function() {
 		// code is the output array
 		var mt, t, code = [];
@@ -92,7 +102,7 @@ enyo.kind({
 			//
 			// array start
 			else if (t == '[') {
-				this.processArray(code, mt);
+				this.processChildren("array", code);
 			}
 			// array end
 			else if (t == ']') {
@@ -102,7 +112,7 @@ enyo.kind({
 			//
 			// block start
 			else if (t == '{') {
-				this.processBlock(code, mt);
+				this.processChildren("block", code);
 			}
 			// block end
 			else if (t == '}') {
@@ -112,7 +122,8 @@ enyo.kind({
 			//
 			// association start
 			else if (t == '(') {
-				this.processAssociation(code, mt);
+				var kind = (this.lastToken.kind == "identifier" || this.lastToken.token == "function") ? "argument-list" : "association";
+				this.processChildren(kind, code);
 			}
 			// association end
 			else if (t == ')') {
@@ -166,21 +177,9 @@ enyo.kind({
 		}
 		return inCode;
 	},
-	processArray: function(inCode, inToken) {
+	processChildren: function(inKind, inCode) {
 		this.identifier(inCode);
-		this.findChildren(this.pushNode(inCode, 'array'));
-	},
-	processBlock: function(inCode, inToken) {
-		this.identifier(inCode);
-		this.findChildren(this.pushNode(inCode, 'block'));
-	},
-	processAssociation: function(inCode, inToken) {
-		this.identifier(inCode);
-		var kind = 'association';
-		if (this.lastToken.kind == "identifier" || this.lastToken.token == "function") {
-			kind = 'argument-list';
-		}
-		this.findChildren(this.pushNode(inCode, kind));
+		this.findChildren(this.pushNode(inCode, inKind));
 	},
 	findChildren: function(inNode) {
 		var children = this.processTokens();

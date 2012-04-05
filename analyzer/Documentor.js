@@ -385,17 +385,6 @@ enyo.kind({
 	}
 });
 
-valueParser = {
-	parseProperties: function(inNodes) {
-		// nodes could be comments, or properties
-		this.comment = [];
-		this.group = 'public';
-		// iterate through property list
-		for (var i = 0, p, pt; (p = inNodes[i]); i++) {
-		}
-	}
-};
-
 stripQuotes = function(inString) {
 	var c0 = inString.charAt(0);
 	if (c0 == '"' || c0 == "'") {

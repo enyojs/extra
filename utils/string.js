@@ -17,31 +17,6 @@ enyo.string = {
 		}
 		return inString;
 	},
-	/**
-		return string with ampersand, less-than, and greater-than characters replaced with HTML entities, 
-		e.g. '&lt;code&gt;"This &amp; That"&lt;/code&gt;' becomes '&amp;lt;code&amp;gt;"This &amp;amp; That"&amp;lt;/code&amp;gt;' 
-	*/
-	escapeHtml: function(inText) {
-		return inText != null ? String(inText).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
-	},
-	/**
-		return string with ampersand and double quote characters replaced with HTML entities, 
-		e.g. 'hello from "Me & She"' becomes 'hello from &amp;quot;Me &amp;amp; She&amp;quot;' 
-	*/
-	escapeHtmlAttribute: function(inText) {
-		return inText != null ? String(inText).replace(/&/g,'&amp;').replace(/"/g,'&quot;') : '';
-	},
-	/** return a text-only version of a string that may contain html */
-	// credit to PrototypeJs for these regular expressions
-	// Note, it's possible to use dom to strip tags using innerHtml/innerText tricks
-	// but dom executes html so this is unsecure. In addition entities are converted to tags
-	_scriptsRe: new RegExp("<script[^>]*>([\\S\\s]*?)<\/script>", "gim"),
-	_tagsRe: new RegExp(/<\w+(\s+("[^"]*"|'[^']*'|[^>])+)?>|<\/\w+>/gi),
-	removeHtml: function(inHtml) {
-		var t = inHtml.replace(enyo.string._scriptsRe, "").replace(enyo.string._tagsRe, "");
-		// just to be sure, escape any html we may have missed.
-		return enyo.string.escapeHtml(t);
-	},
 	//* Encode a string to Base64
 	toBase64: function(inText) { return window.btoa(inText); },
 	//* Decode string from Base64. Throws exception on bad input.
