@@ -33,7 +33,7 @@ enyo.kind({
 			script.src = src;
 			var first = document.getElementsByTagName('script')[0];
 			first.parentNode.insertBefore(script, first);
-			return script;		
+			return script;
 		},
 
 		removeElement: function(elem) {
@@ -69,8 +69,8 @@ enyo.kind({
 		var parts = this.url.split("?");
 		var uri = parts.shift() || "";
 		var args = parts.join("?").split("&");
+
 		var body;
-		
 		if (enyo.isString(inParams)) {
 			body = inParams.replace("=?", "=" + callbackFunctionName);
 		}
@@ -79,8 +79,8 @@ enyo.kind({
 			params[this.callbackName] = callbackFunctionName;
 			body = enyo.Ajax.objectToQuery(params);
 		}
+		args.push(body);
 
-		args.push(body);	
 		var url = [uri, args.join("&")].join("?");
 		var script = enyo.JsonpRequest.addScriptElement(url);
 		window[callbackFunctionName] = enyo.bind(this, this.respond);
@@ -92,6 +92,5 @@ enyo.kind({
 		};
 		this.response(cleanup);
 		this.error(cleanup);
-			
 	}
 });
