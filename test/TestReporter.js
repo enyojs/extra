@@ -26,7 +26,7 @@ enyo.kind({
 		this.$.testSuite.runAllTests();
 	},
 	testBegun: function(inSender, inEvent) {
-		this.$.group.createComponent({name: inEvent.testName, classes: "enyo-testcase-running", content: inEvent.testName + ": running"}).render();
+		this.$.group.createComponent({name: inEvent.testName, classes: "enyo-testcase-running", content: inEvent.testName + ": running", allowHtml: true}).render();
 	},
 	formatStackTrace: function(inStack) {
 		var stack = inStack.split("\n");
