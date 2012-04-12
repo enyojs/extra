@@ -1,22 +1,22 @@
 /**
-	Listens for all the Phonegap specific events (as of 1.5.0)
+Listens for all the Phonegap specific events (as of 1.5.0)
 
-	All events are exposted through the [Signals](#enyo.Signals) kind by adding callback handlers.
+All events are exposted through the [Signals](#enyo.Signals) kind by adding callback handlers.
 
-	Example:
+Example:
 
-		enyo.kind({
-			name: "App",
-			components: [
-				{kind: "Signals", ondeviceready: "devicereadyHandler"},
-				...
-				],
-			devicereadyHandler: function() {
-				// Phonegap API exists at this point forward
-			}
-		});
+enyo.kind({
+	name: "App",
+	components: [
+		{kind: "Signals", ondeviceready: "devicereadyHandler"},
+		...
+		],
+	devicereadyHandler: function() {
+	// Phonegap API exists at this point forward
+	}
+});
 
-	List of phonegap events detailed on the [Phonegap Docs](http://docs.phonegap.com/en/1.5.0/phonegap_events_events.md.html#Events)
+List of phonegap events detailed on the [Phonegap Docs](http://docs.phonegap.com/en/1.5.0/phonegap_events_events.md.html#Events)
 */
 //* @protected
 (function(){
@@ -37,7 +37,10 @@
 		"volumedownbutton",
 		"volumeupbutton"
 	];
-	for (var i = 0, e; e = pge[i]; i++) {
-		enyo.dispatcher.listen(document, e);
+
+	for (var i = 0, e, f; e = pge[i]; i++) {
+		// some phonegap events have no type, so enyo.dispatch fails
+		f = enyo.bind(enyo.Signals, "send", "on" + e);
+		document.addEventListener(e, f, false);
 	}
 })();
