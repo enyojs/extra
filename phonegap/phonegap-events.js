@@ -1,5 +1,5 @@
 /**
-Listens for all the Phonegap specific events (as of 1.5.0)
+Listens for all the Phonegap specific events (as of 1.6.0)
 
 All events are exposted through the [Signals](#enyo.Signals) kind by adding callback handlers.
 
@@ -16,7 +16,7 @@ enyo.kind({
 	}
 });
 
-List of phonegap events detailed on the [Phonegap Docs](http://docs.phonegap.com/en/1.5.0/phonegap_events_events.md.html#Events)
+List of phonegap events detailed on the [Phonegap Docs](http://docs.phonegap.com/en/1.6.0/phonegap_events_events.md.html#Events)
 */
 //* @protected
 (function(){
@@ -38,6 +38,9 @@ List of phonegap events detailed on the [Phonegap Docs](http://docs.phonegap.com
 		"volumeupbutton"
 	];
 
+	if (!window.cordova || !window.PhoneGap) {
+		enyo.error("Phonegap needs to be loaded before enyo for events to attach correctly");
+	}
 	for (var i = 0, e, f; e = pge[i]; i++) {
 		// some phonegap events have no type, so enyo.dispatch fails
 		f = enyo.bind(enyo.Signals, "send", "on" + e);
