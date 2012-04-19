@@ -18,7 +18,7 @@ var Iterator = enyo.kind({
 */
 
 enyo.kind({
-	name: "enyo.Processor",
+	name: "Processor",
 	kind: null,
 	i: 0,
 	nodes: null,
@@ -49,8 +49,8 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "enyo.DocParser",
-	kind: "enyo.Processor",
+	name: "DocParser",
+	kind: "Processor",
 	group: "public",
 	comment: null,
 	result: null,
