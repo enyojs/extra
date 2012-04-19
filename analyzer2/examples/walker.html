@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+	<title>Analyzer Example</title>
+	<!-- -->
+	<script src="../../../../enyo/enyo.js" type="text/javascript"></script>
+	<!-- -->
+	<script src="../runtime-machine.js" type="text/javascript"></script>
+	<script src="../Walker.js" type="text/javascript"></script>
+</head>
+<body>
+	<script>
+		var path = "$enyo/source";
+		new Walker()
+			.walk(path)
+			.response(function(inSender, inData) {
+				console.dir(inData.modules);
+				console.log("done");
+			});
+	</script>
+</body>
+</html>
