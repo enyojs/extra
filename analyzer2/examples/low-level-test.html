@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+<head>
+	<title>Analyzer Example</title>
+	<!-- -->
+	<script src="../../../../enyo/enyo.js" type="text/javascript"></script>
+	<!-- -->
+	<script src="../../utils/string.js" type="text/javascript"></script>
+	<script src="../Lexer.js" type="text/javascript"></script>
+	<script src="../Iterator.js" type="text/javascript"></script>
+	<script src="../Parser.js" type="text/javascript"></script>
+	<script src="../Documentor.js" type="text/javascript"></script>
+	<!-- -->
+	<style>
+		i {
+			color: Blue;
+		}
+		group {
+			color: Orange;
+		}
+	</style>
+</head>
+<body>
+	<script id="Xtest">
+		//* doc comment
+		x = {
+			/** doc comment */
+			y: {
+				z: 3 * "{}"
+			}
+		};
+		// closure
+		(function() {
+			goo = function() {
+			};
+			nard = function() {
+			}
+			function flong() {
+			}
+		})();
+	</script>
+	<script id="Xtest">
+		var a = [];
+		var b = {};
+		var c = function(){};
+		var d = {
+			da: 3,
+			db: function(){},
+			dc: (function(){})()
+		};
+	</script>
+	<script id="Xtest">
+		var z = [
+			"a",
+			"b",
+			"c"
+		];
+		var a = {
+			b: 0,
+			c: 1
+		};
+		var q = [
+			"easy",
+			42,
+			"less" + " easy",
+			Math.Pi + {foo: 3}.foo / 96 + [1,2,3][0],
+			"that was hard"
+		];
+		//* a kind of a thing
+		enyo.kind({
+			//* a property of a thing
+			foo: 3,
+			components: [
+				{kind: "nard"},
+				{kind: "binge"}
+			],
+			handlers: {
+				onbar: "bar",
+				onzot: "zot"
+			},
+			method: function() {
+			},
+			method2: function() {
+			},
+			statics: {
+				flarn: function() {
+				},
+				spooz: 3
+			}
+		});
+		// object literal
+		var o = {
+			y: "boss",
+			x: "foo",
+			// comment in the middle
+			z: "noo:cool''"
+		};
+		// useless comment
+		x = "foo";
+		y = 0;
+		// complicated expression
+		y = x/2 <= y ? "foo" : (x*3/2 || y) / x + "fla\"nr" +
+			132.53 + Math.PI
+			;
+		//* doc comment
+		x = {
+			/** doc comment */
+			y: {
+				z: 3 * "{}"
+			}
+		};
+		// closure
+		(function() {
+			goo = function() {
+			};
+			nard = function() {
+			}
+			function flong() {
+			}
+		})();
+		3, x+2, (function(){})(), "nar"
+	</script>
+	<script id="test">
+		//* a kind of a thing
+		enyo.kind({
+			name: "Foo",
+			//* a property of a thing
+			foo: 3,
+			components: [
+				{kind: "nard"},
+				{kind: "binge"}
+			],
+			handlers: {
+				onbar: "bar",
+				onzot: "zot"
+			},
+			method: function() {
+			},
+			method2: function() {
+			},
+			statics: {
+				flarn: function() {
+				},
+				spooz: 3
+			}
+		});
+		uberFunc = function() {
+		}
+		function uberSponk() {
+		}
+		enyo.gooGoo = {
+		};
+		(function(){
+			enyo.snar = function() {
+			}
+			var phlegm = 0;
+			var poosh = 4;
+			var zim = enyo.kind({});
+			// FIXME: parsed as a global reference, but it's not
+			function biz() {
+				alert("biz");
+			}
+		})();
+	</script>
+	<script>
+		w = function(h) {document.write(h);};
+		//
+		dumpTokens = function(inTokens) {
+			w("<pre>");
+			for (var i=0, t; t=inTokens[i]; i++) {
+				w("<i>" + t.kind + "</i>: ");
+				w("<blockquote><span style='background-color:lightblue; padding: 4px;'>");
+				w(t.token.replace(/\</g, "&lt;").replace(/\>/g, "&gt;"));
+				w("</span></blockquote>");
+			}
+			w("</pre>");
+		}
+		//
+		dumpNodes = function(inNodes) {
+			var it = new Iterator(inNodes);
+			while (it.next()) {
+				//console.log(it.value);
+				w("<i>" + it.value.kind + "</i>: ");
+				w(it.value.token);
+				w("<br/>");
+				if (it.value.children) {
+					w("<blockquote>");
+					dumpNodes(it.value.children);
+					w("</blockquote><-<br/>");
+				}
+			}
+		}
+		//
+		dumpObjects = function(inObjects) {
+			var it = new Iterator(inObjects);
+			while (it.next()) {
+				var o = it.value;
+				w("<i>" + o.type + "</i>: ");
+				if (o.comment) {
+					w("<blockquote><i style='background-color:#eee; padding: 4px;'>");
+					w(o.comment);
+					w("</i></blockquote>");
+				}
+				w("<blockquote><span style='background-color:lightblue; padding: 4px; white-space: nowrap;'>");
+				w(o.token.replace(/\</g, "&lt;").replace(/\>/g, "&gt;"));
+				w("</span></blockquote>");
+				//
+				if (o.properties) {
+					w("<blockquote>");
+					dumpObjects(o.properties);
+					w("</blockquote><-<br/>");
+				}
+				//
+				if (o.value) {
+					w("<blockquote>");
+					dumpObjects(o.value);
+					w("</blockquote><-<br/>");
+				}
+			}
+		}
+		//
+		getByType = function(inObjects, inType) {
+			var result = [];
+			for (var i=0, o; o=inObjects[i]; i++) {
+				if (o.type == inType) {
+					result.push(o);
+				}
+			}
+			return result;
+		}
+		presentObjects = function(inObjects) {
+			w("<h3>Kinds</h3>");
+			var objs = getByType(inObjects, "kind");
+			for (var i=0, o; o=objs[i]; i++) {
+				w("<i>name:</i> <label>" + o.name + "</label><br/>");
+			}
+			w("<h3>Functions</h3>");
+			var objs = getByType(inObjects, "function");
+			for (var i=0, o; o=objs[i]; i++) {
+				w("<i>name:</i> <label>" + o.name + "</label><br/>");
+			}
+			w("<h3>Variables</h3>");
+			var objs = getByType(inObjects, "global");
+			for (var i=0, o; o=objs[i]; i++) {
+				w("<i>name:</i> <label>" + o.name + "</label><br/>");
+			}
+		}
+		//
+		var s = document.getElementById("test");
+		//
+		var tokens = new Lexer(s.text);
+		w('Lexer: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
+		console.dir(tokens);
+		dumpTokens(tokens);
+		w('</div>');
+		//
+		w('<br/>');
+		//
+		var nodes = new Parser(tokens);
+		console.dir(nodes);
+		w('Parser: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
+		dumpNodes(nodes);
+		w('</div>');
+		//
+		w('<br/>');
+		//
+		var objects = new Documentor(nodes);
+		console.dir(objects);
+		w('Processor: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
+		dumpObjects(objects);
+		w('</div>');
+		//
+		w('Presentor: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
+		presentObjects(objects);
+		w('</div>');
+		//
+		document.body.onload = function() {
+			setTimeout(function() {
+				document.body.scrollTop = 8000;
+			}, 100);
+		}
+	</script>
+</body>
+</html>

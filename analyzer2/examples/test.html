@@ -21,147 +21,16 @@
 	</style>
 </head>
 <body>
-	<script id="Xtest">
-		//* doc comment
-		x = {
-			/** doc comment */
-			y: {
-				z: 3 * "{}"
-			}
-		};
-		// closure
-		(function() {
-			goo = function() {
-			};
-			nard = function() {
-			}
-			function flong() {
-			}
-		})();
-	</script>
-	<script id="Xtest">
-		var a = [];
-		var b = {};
-		var c = function(){};
-		var d = {
-			da: 3,
-			db: function(){},
-			dc: (function(){})()
-		};
-	</script>
-	<script id="Xtest">
-		var z = [
-			"a",
-			"b",
-			"c"
-		];
-		var a = {
-			b: 0,
-			c: 1
-		};
-		var q = [
-			"easy",
-			42,
-			"less" + " easy",
-			Math.Pi + {foo: 3}.foo / 96 + [1,2,3][0],
-			"that was hard"
-		];
-		//* a kind of a thing
-		enyo.kind({
-			//* a property of a thing
-			foo: 3,
-			components: [
-				{kind: "nard"},
-				{kind: "binge"}
-			],
-			handlers: {
-				onbar: "bar",
-				onzot: "zot"
-			},
-			method: function() {
-			},
-			method2: function() {
-			},
-			statics: {
-				flarn: function() {
-				},
-				spooz: 3
-			}
-		});
-		// object literal
-		var o = {
-			y: "boss",
-			x: "foo",
-			// comment in the middle
-			z: "noo:cool''"
-		};
-		// useless comment
-		x = "foo";
-		y = 0;
-		// complicated expression
-		y = x/2 <= y ? "foo" : (x*3/2 || y) / x + "fla\"nr" +
-			132.53 + Math.PI
-			;
-		//* doc comment
-		x = {
-			/** doc comment */
-			y: {
-				z: 3 * "{}"
-			}
-		};
-		// closure
-		(function() {
-			goo = function() {
-			};
-			nard = function() {
-			}
-			function flong() {
-			}
-		})();
-		3, x+2, (function(){})(), "nar"
-	</script>
 	<script id="test">
-		//* a kind of a thing
-		enyo.kind({
-			name: "Foo",
-			//* a property of a thing
-			foo: 3,
-			components: [
-				{kind: "nard"},
-				{kind: "binge"}
-			],
-			handlers: {
-				onbar: "bar",
-				onzot: "zot"
-			},
-			method: function() {
-			},
-			method2: function() {
-			},
-			statics: {
-				flarn: function() {
-				},
-				spooz: 3
-			}
-		});
-		uberFunc = function() {
-		}
-		function uberSpunk() {
-		}
-		enyo.gooGoo = {
-		};
-		(function(){
-			enyo.snar = function() {
-			}
-			var phlegm = 0;
-			var poosh = 4;
-			var zim = enyo.kind({});
-			// FIXME: parsed as a global reference, but it's not
-			function biz() {
-				alert("biz");
-			}
-		})();
+	components = [
+		{name: "progressAnimator", kind: "Animator", onStep: "progressAnimatorStep", onEnd: "progressAnimatorComplete"},
+		{name: "bar", classes: "onyx-progress-bar-bar onyx-progress-button-bar"},
+		{name: "client", classes: "onyx-progress-button-client"},
+		{kind: "onyx.Icon", src: "$lib/onyx/images/progress-button-cancel.png", classes: "onyx-progress-button-icon", ontap: "cancelTap"}
+	];
 	</script>
+
+
 	<script>
 		w = function(h) {document.write(h);};
 		//
@@ -169,7 +38,7 @@
 			w("<pre>");
 			for (var i=0, t; t=inTokens[i]; i++) {
 				w("<i>" + t.kind + "</i>: ");
-				w("<blockquote><span style='background-color:lightblue; padding: 4px;'>");
+				w("<blockquote><span style='background-color:lightblue; padding: 1px;'>");
 				w(t.token.replace(/\</g, "&lt;").replace(/\>/g, "&gt;"));
 				w("</span></blockquote>");
 			}
@@ -266,7 +135,7 @@
 		//
 		var objects = new Documentor(nodes);
 		console.dir(objects);
-		w('Processor: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
+		w('Documentor: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
 		dumpObjects(objects);
 		w('</div>');
 		//

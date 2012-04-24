@@ -8,8 +8,7 @@ enyo.kind({
 		onProgress: "",
 		onFinish: ""
 	},
-	walk: function(inSource) {
-		this.async = new enyo.Async();
+	walk: function(inPath) {
 		// make a new loader
 		this.loader = new enyo.loaderFactory(runtimeMachine);
 		// stub out script loader, we only need manifests to walk dependencies
@@ -24,11 +23,11 @@ enyo.kind({
 		// substitute for default loader
 		enyo.loader = this.loader;
 		// walk application dependencies
-		var path = enyo.path.rewrite(inSource);
+		var path = enyo.path.rewrite(inPath);
 		enyo.asyncMethod(enyo.loader, "load", path);
 		//enyo.loader.load(enyo.path.rewrite(inSource));
 		//enyo.depends(inSource);
-		return this.async;
+		return this.async = new enyo.Async();
 	},
 	walkReport: function(inAction, inName) {
 		this.doProgress({action: inAction, name: inName});

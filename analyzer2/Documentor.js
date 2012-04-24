@@ -37,11 +37,7 @@ enyo.kind({
 					// skip the closure invocation [()]
 					it.next();
 				}
-			} /*else if (node.token == "function") {
-				if (node.children && node.children.length > 0) {
-					
-				}
-			}*/
+			}
 			if (obj) {
 				objects.push(obj);
 				obj = null;
@@ -93,16 +89,7 @@ enyo.kind({
 				return obj;
 			}
 			else if (node.kind == "array") {
-				var obj = this.make("array", node);
-				var nodes = node.children;
-				if (nodes) {
-					var elts = [];
-					for (var i=0, n; n=nodes[i]; i++) {
-						elts.push(this.walkValue(new Iterator([n])));
-					}
-					obj.properties = elts;
-				}
-				return obj;
+				return this.cook_array(it);
 			}
 			else {
 				var obj = this.make("expression", node);
@@ -114,6 +101,19 @@ enyo.kind({
 				return obj;
 			}
 		}
+	},
+	cook_array: function(it) {
+		var node = it.value;
+		var obj = this.make("array", node);
+		var nodes = node.children;
+		if (nodes) {
+			var elts = [];
+			for (var i=0, n; n=nodes[i]; i++) {
+				elts.push(this.walkValue(new Iterator(n.children)));
+			}
+			obj.properties = elts;
+		}
+		return obj;
 	},
 	cook_assignment: function(it) {
 		var node = it.value;
@@ -137,7 +137,7 @@ enyo.kind({
 			name: inNode.token,
 			type: inType,
 			group: this.group,
-			comment: this.consumeComment(),
+			comment: this.consumeComment()
 			//
 			//kind: inType,
 			//node: inNode
@@ -191,7 +191,7 @@ enyo.kind({
 		this.comment = [];
 		// Remove leading indent so markdown spacing is intact.
 		// Assumes first non-empty line in comment is block-left.
-		return enyo.string.removeIndent(comment);
+		return Documentor.removeIndent(comment);
 	},
 	statics: {
 		findByName: function(inObjects, inName) {
@@ -200,28 +200,27 @@ enyo.kind({
 					return o;
 				}
 			}
+		},
+		// Remove leading indent so markdown spacing is intact.
+		// Assumes first non-empty line in comment is block-left.
+		removeIndent: function(inString) {
+			var indent = 0;
+			var lines = inString.split(/\r?\n/);
+			for (var i=0, l; (l=lines[i]) != null; i++) {
+				if (l.length > 0) {
+					indent = l.search(/\S/);
+					if (indent < 0) {
+						indent = l.length;
+					}
+					break;
+				}
+			}
+			if (indent) {
+				for (var i=0, l; (l=lines[i]) != null; i++) {
+					lines[i] = l.slice(indent);
+				}
+			}
+			return lines.join("\n");
 		}
 	}
 });
-
-// Remove leading indent so markdown spacing is intact.
-// Assumes first non-empty line in comment is block-left.
-enyo.string.removeIndent = function(inString) {
-	var indent = 0;
-	var lines = inString.split(/\r?\n/);
-	for (var i=0, l; (l=lines[i]) != null; i++) {
-		if (l.length > 0) {
-			indent = l.search(/\S/);
-			if (indent < 0) {
-				indent = l.length;
-			}
-			break;
-		}
-	}
-	if (indent) {
-		for (var i=0, l; (l=lines[i]) != null; i++) {
-			lines[i] = l.slice(indent);
-		}
-	}
-	return lines.join("\n");
-};

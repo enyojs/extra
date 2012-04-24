@@ -95,7 +95,7 @@ enyo.kind({
 enyo.kind({
 	name: "Lexer",
 	kind:  BaseLexer,
-	symbols: "(){}[];,:<>+-=*/",
+	symbols: "(){}[];,:<>+-=*/&",
 	operators: [ "++", "--", "+=", "-=", "==", "!=", "<=", ">=", "===", "&&", "||", '"', "'"],
 	keywords: [ "function", "new", "return", "if", "else", "while", "do", "break", "continue", "switch", "case", "var" ],
 	constructor: function(inText) {
@@ -126,18 +126,19 @@ enyo.kind({
 		//rsymbols += '|' + rops;
 		// match rops first (greedy, "<=" instead of "<", "=")
 		rsymbols = rops + "|" + rsymbols;
-		console.log(rsymbols);
+		//console.log(rsymbols);
 		//
 		// these are all the patterns to match
-		var matches = [rstring1, rstring2, rkeys, '\\/\\/', '\\/\\*', /*rregex,*/ rsymbols, "'\"", '\\s'];
+		//var matches = [rstring1, rstring2, rkeys, '\\/\\/', '\\/\\*', /*rregex,*/ rsymbols, "'\"", '\\s'];
 		// these are the matching methods corresponding to the patterns above
-		this.matchers = ["doString", "doString", "doKeyword", "doLineComment", "doCComment", /*"doRegExp",*/ "doSymbol", "doLiteral", "doWhitespace"];
+		//this.matchers = ["doString", "doString", "doKeyword", "doLineComment", "doCComment", /*"doRegExp",*/ "doSymbol", "doLiteral", "doWhitespace"];
 		//
 		//
-		//var matches = ["[/s/S]*"];
-		var matches = [rstring, rkeys, '\\/\\/', '\\/\\*', rsymbols, "\\s"];
+		// these are the patterns to match
+		// match escape sequences \" and \/ first to help defray confusion
+		var matches = ["\\\\\"|\\\\/", rstring, rkeys, '\\/\\/', '\\/\\*', rsymbols, "\\s"];
 		// these are the matching methods corresponding to the patterns above
-		this.matchers = ["doString", "doKeyword", "doLineComment", "doCComment", "doSymbol", "doWhitespace"];
+		this.matchers = ["doSymbol", "doString", "doKeyword", "doLineComment", "doCComment", "doSymbol", "doWhitespace"];
 		//
 		//
 		// construct the master regex as a union of the patterns above
@@ -170,6 +171,8 @@ enyo.kind({
 		this.search(/\S/g);
 		// push all such characters as a ws token
 		this.pushToken('ws');
+		// remove the actual token (don't capture whitespace)
+		this.r.pop();
 	},
 	doEscape: function() {
 		this.tokenize(2);
