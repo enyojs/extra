@@ -46,6 +46,22 @@ enyo.kind({
 		return objects;
 	},
 	cook_kind: function(it) {
+		// Get inProps[name].value[0].token
+		var val = function(inProps, inName) {
+			var p = Documentor.findByName(inProps, inName);
+			return p && p.value && p.value.length && p.value[0].token;
+		};
+		/*
+		// Set inProps[name].properties to inProps[name].value[0].properties
+		var flatten = function(inProps, inName) {
+			var p = Documentor.findByName(inProps, inName);
+			var v = p && p.value && p.value.length && p.value[0];
+			if (v) {
+				p.properties = p.value[0].properties;
+			}
+		};
+		*/
+		//
 		var obj = this.make("kind", it.value);
 		// arguments
 		it.next();
@@ -56,8 +72,10 @@ enyo.kind({
 			// these are the properties
 			obj.properties = this.cook_block(args[0].children);
 			// process special properties
-			var o = Documentor.findByName(obj.properties, "name");
-			obj.name = o && o.value && o.value.length && o.value[0].token;
+			obj.name = val(obj.properties, "name");
+			obj.superkind = val(obj.properties, "kind");
+			// remove excess value nodes
+			//flatten(obj.properties, "published");
 		}
 		return obj;
 	},
@@ -194,12 +212,16 @@ enyo.kind({
 		return Documentor.removeIndent(comment);
 	},
 	statics: {
-		findByName: function(inObjects, inName) {
+		indexByName: function(inObjects, inName) {
 			for (var i=0, o; o=inObjects[i]; i++) {
 				if (o.name == inName) {
-					return o;
+					return i;
 				}
 			}
+			return -1;
+		},
+		findByName: function(inObjects, inName) {
+			return inObjects[this.indexByName(inObjects, inName)];
 		},
 		// Remove leading indent so markdown spacing is intact.
 		// Assumes first non-empty line in comment is block-left.

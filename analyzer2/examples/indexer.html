@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+	<title>Analyzer Example</title>
+	<!-- -->
+	<script src="../../../../enyo/enyo.js" type="text/javascript"></script>
+	<!-- -->
+	<script src="../../../layout/fittable/package.js" type="text/javascript"></script>
+	<script src="../../utils/string.js" type="text/javascript"></script>
+	<script src="../package.js" type="text/javascript"></script>
+	<script src="Presentor.js" type="text/javascript"></script>
+	<!-- -->
+	<style>
+		body {
+			background-color: silver;
+		}
+		i {
+			color: #555;
+		}
+		comment {
+			display: block;
+			font-size: smaller;
+			font-style: italic;
+			color: green;
+			padding: 16px 0 8px;
+		}
+		label {
+			font-weight: bold;
+		}
+		public {
+			color: Orange;
+			padding-right: 4px;
+		}
+		protected {
+			color: Red;
+			padding-right: 4px;
+		}
+		module {
+			text-decoration: underline;
+			color: #46E;
+			cursor: pointer;
+		}
+		.box {
+			padding: 8px;
+			border: 1px solid #eee;
+			border-radius: 4px;
+			margin: 8px;
+			background-color: whitesmoke;
+			overflow: auto;
+		}
+		#app_modules {
+			width: 16%;
+		}
+		#app_body {
+			width: 30%;
+		}
+	</style>
+</head>
+<body>
+	<script>
+		enyo.kind({
+			name: "App",
+			kind: "FittableColumns",
+			style: "padding: 8px 0;",
+			components: [
+				{name: "modules", classes: "box"},
+				{name: "docs", fit: true, classes: "box", allowHtml: true},
+				{name: "body", tag: "code", fit: true, classes: "box", style: "overflow: auto;"}
+			],
+			create: function() {
+				this.indexer = new Indexer();
+				this.inherited(arguments);
+				//this.read("$enyo/source");
+				this.walk(["$enyo/source", "$lib/layout/fittable", "$enyo/../internal/lib/list", "$lib/onyx/source"]);
+			},
+			walk: function(inPaths) {
+				this.modules = [];
+				var next = function(inSender, inData) {
+					if (inData) {
+						this.modules = this.modules.concat(inData.modules);
+					}
+					var path = inPaths.shift();
+					if (path) {
+						//this.log(path);
+						new Walker().walk(path).response(this, next);
+					} else {
+						this.read(this.modules);
+					}
+				};
+				next.call(this);
+			},
+			read: function(inModules) {
+				new Reader()
+					.go({modules: inModules})
+					.response(this, function(inSender, inData) {
+						this.modules = inData.modules;
+						this.$.modules.destroyClientControls();
+						for (var i=0, m; m=this.modules[i]; i++) {
+							this.createComponent({tag: "module", container: this.$.modules, allowHtml: true, content: m.rawPath + "<br/>", module: m, ontap: "moduleTap"});
+						}
+						this.$.modules.render();
+						this.document(this.modules[8].code);
+					})
+				;
+			},
+			moduleTap: function(inSender) {
+				this.document(inSender.module.code);
+			},
+			document: function(inCode) {
+				this.$.body.setContent(inCode);
+				//
+				var tokens = new Lexer(inCode);
+				var nodes = new Parser(tokens);
+				var objects = new Documentor(nodes);
+				//this.indexer.add(objects);
+				var html = new Presentor().presentObjects(objects);
+				this.$.docs.setContent(html);
+			}
+		});
+		new App({fit: true}).write();
+	</script>
+</body>
+</html>
