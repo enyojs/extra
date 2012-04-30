@@ -56,7 +56,7 @@ enyo.kind({
 		return result;
 	},
 	filter: function(inFilterFn) {
-		return enyo.forEach(this.objects, inFilterFn);
+		return enyo.filter(this.objects, inFilterFn);
 	},
 	findByProperty: function(inList, inProperty, inValue) {
 		for (var i=0, k; k=inList[i]; i++) {
