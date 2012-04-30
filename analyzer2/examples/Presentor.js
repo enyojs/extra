@@ -23,10 +23,11 @@ enyo.kind({
 		w("<h3>Kinds</h3>");
 		var objs = this.getByType(inObjects, "kind");
 		for (var i=0, o; o=objs[i]; i++) {
+			//w("<i>name:</i> ");
+			w("<kind>" + o.name + "</kind><br/>");
 			if (o.comment) {
 				html += "<comment>" + o.comment + "</comment>";
 			}
-			w("<i>name:</i> <label>" + o.name + "</label><br/>");
 			w("<blockquote>" + this.presentKind(o) + "</blockquote>");
 		}
 		w("<h3>Functions</h3>");
@@ -56,24 +57,39 @@ enyo.kind({
 	},
 	presentKind: function(inKind) {
 		console.log("kind: ", inKind);
-		return "<h3>Properties</h3>"
+		var html = '';
+		if (inKind.superkinds) {
+			html += "<h3>Extends</h3>";
+			enyo.forEach(inKind.superkinds, function(e) {
+				html += "<superkind>" + e + "</superkind>";
+			});
+		};
+		html += 
+			"<h3>Properties</h3>"
 			+ this.presentBlock(inKind)
 			;
-	},
-	presentBlock: function(inObject) {
-		var html = '';
-		var props = inObject.properties;
-		for (var i=0, p; p=props[i]; i++) {
-			html += this.presentProperty(p);
-		}
+		html += 
+			"<h3>All Properties</h3>"
+			+ this.presentProperties(inKind.allProperties)
+			;
 		return html;
 	},
+	presentBlock: function(inObject) {
+		return this.presentProperties(inObject.properties);
+	},
 	presentArray: function(inObject) {
-		console.log("array: ", inObject);
+		//console.log("array: ", inObject);
 		var html = '';
 		var props = inObject.properties;
 		for (var i=0, p; p=props[i]; i++) {
 			html += '<i>' + i + '</i>: ' + this.presentExpression(p);
+		}
+		return html;
+	},
+	presentProperties: function(inProperties) {
+		var html = '';
+		for (var i=0, p; p=inProperties[i]; i++) {
+			html += this.presentProperty(p);
 		}
 		return html;
 	},

@@ -29,15 +29,33 @@
 		}
 		public {
 			color: Orange;
-			padding-right: 4px;
+			padding-right: 6px;
 		}
 		protected {
 			color: Red;
-			padding-right: 4px;
+			padding-right: 6px;
+		}
+		published {
+			color: green;
+			padding-right: 6px;
+		}
+		kind {
+			font-size: x-large;
+			font-weight: bold;
+			display: block;
+		}
+		superkind {
+			color: #555;
+			display: block;
 		}
 		module {
 			text-decoration: underline;
 			color: #46E;
+			cursor: pointer;
+		}
+		topic {
+			text-decoration: underline;
+			color: #C39;
 			cursor: pointer;
 		}
 		.box {
@@ -49,10 +67,16 @@
 			overflow: auto;
 		}
 		#app_modules {
-			width: 16%;
+			width: 12%;
+			font-size: smaller;
 		}
-		#app_body {
+		#app_index {
+			width: 18%;
+			font-size: smaller;
+		}
+		#app_code {
 			width: 30%;
+			font-size: x-small;
 		}
 	</style>
 </head>
@@ -64,14 +88,14 @@
 			style: "padding: 8px 0;",
 			components: [
 				{name: "modules", classes: "box"},
+				{name: "index", classes: "box"},
 				{name: "docs", fit: true, classes: "box", allowHtml: true},
-				{name: "body", tag: "code", fit: true, classes: "box", style: "overflow: auto;"}
+				{name: "code", tag: "code", fit: true, classes: "box", style: "overflow: auto;"}
 			],
 			create: function() {
 				this.indexer = new Indexer();
 				this.inherited(arguments);
-				//this.read("$enyo/source");
-				this.walk(["$enyo/source", "$lib/layout/fittable", "$enyo/../internal/lib/list", "$lib/onyx/source"]);
+				this.walk(["$enyo/source", "$lib/layout", "$lib/onyx/source"]);
 			},
 			walk: function(inPaths) {
 				this.modules = [];
@@ -94,27 +118,40 @@
 					.go({modules: inModules})
 					.response(this, function(inSender, inData) {
 						this.modules = inData.modules;
-						this.$.modules.destroyClientControls();
-						for (var i=0, m; m=this.modules[i]; i++) {
-							this.createComponent({tag: "module", container: this.$.modules, allowHtml: true, content: m.rawPath + "<br/>", module: m, ontap: "moduleTap"});
-						}
-						this.$.modules.render();
-						this.document(this.modules[8].code);
+						this.presentModules();
+						this.index();
+						this.presentIndex();
 					})
 				;
 			},
-			moduleTap: function(inSender) {
-				this.document(inSender.module.code);
+			presentModules: function() {
+				this.$.modules.destroyClientControls();
+				for (var i=0, m; m=this.modules[i]; i++) {
+					this.createComponent({tag: "module", container: this.$.modules, allowHtml: true, content: m.rawPath + "<br/>", module: m, ontap: "moduleTap"});
+				}
+				this.$.modules.render();
 			},
-			document: function(inCode) {
-				this.$.body.setContent(inCode);
-				//
-				var tokens = new Lexer(inCode);
-				var nodes = new Parser(tokens);
-				var objects = new Documentor(nodes);
-				//this.indexer.add(objects);
-				var html = new Presentor().presentObjects(objects);
-				this.$.docs.setContent(html);
+			presentIndex: function() {
+				this.$.index.destroyClientControls();
+				for (var i=0, o; o=this.indexer.objects[i]; i++) {
+					var name = o.name;
+					var object = o.object && o.object.name;
+					var module = o.module && o.module.name /*|| o.object && o.object.module && o.object.module.name*/;
+					var caption = "<topic>" + o.name + "</topic>" + (object ? ": " + object : "") + (module ? " [" + module + "]" : "");
+					this.createComponent({Xtag: "topic", container: this.$.index, allowHtml: true, content: caption + "<br/>", object: o, ontap: "objectTap"});
+				}
+				this.$.index.render();
+			},
+			index: function() {
+				this.indexer.addModules(this.modules);
+				this.document(this.modules[8]);
+			},
+			moduleTap: function(inSender) {
+				this.document(inSender.module);
+			},
+			document: function(inModule) {
+				this.$.code.setContent(inModule.code);
+				this.$.docs.setContent(new Presentor().presentObjects(inModule.objects));
 			}
 		});
 		new App({fit: true}).write();

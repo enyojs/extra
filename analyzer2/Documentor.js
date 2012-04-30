@@ -48,7 +48,11 @@ enyo.kind({
 	cook_kind: function(it) {
 		// Get inProps[name].value[0].token
 		var val = function(inProps, inName) {
-			var p = Documentor.findByName(inProps, inName);
+			var i = Documentor.indexByName(inProps, inName);
+			if (i >= 0) {
+				var p = inProps[i];
+				inProps.splice(p, 1);
+			}
 			return p && p.value && p.value.length && p.value[0].token;
 		};
 		/*
@@ -72,8 +76,11 @@ enyo.kind({
 			// these are the properties
 			obj.properties = this.cook_block(args[0].children);
 			// process special properties
-			obj.name = val(obj.properties, "name");
-			obj.superkind = val(obj.properties, "kind");
+			obj.name = Documentor.stripQuotes(val(obj.properties, "name") || "");
+			obj.superkind = Documentor.stripQuotes(val(obj.properties, "kind") || "enyo.Control");
+			if (obj.superkind == "null") {
+				obj.superkind = null;
+			}
 			// remove excess value nodes
 			//flatten(obj.properties, "published");
 		}
@@ -209,7 +216,9 @@ enyo.kind({
 		this.comment = [];
 		// Remove leading indent so markdown spacing is intact.
 		// Assumes first non-empty line in comment is block-left.
-		return Documentor.removeIndent(comment);
+		var md = Documentor.removeIndent(comment);
+		md = md.replace("<", "&lt;");
+		return md;
 	},
 	statics: {
 		indexByName: function(inObjects, inName) {
@@ -222,6 +231,13 @@ enyo.kind({
 		},
 		findByName: function(inObjects, inName) {
 			return inObjects[this.indexByName(inObjects, inName)];
+		},
+		stripQuotes: function(inString) {
+			var c0 = inString.charAt(0);
+			var s = (c0 == '"' || c0 == "'") ? 1 : 0;
+			var cl = inString.charAt(inString.length - 1);
+			var e = (cl == '"' || cl == "'") ? -1 : 0;
+			return (s || e) ? inString.slice(s, e) : inString;
 		},
 		// Remove leading indent so markdown spacing is intact.
 		// Assumes first non-empty line in comment is block-left.
