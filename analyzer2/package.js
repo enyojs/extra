@@ -6,5 +6,6 @@ enyo.depends(
 	"Lexer.js",
 	"Parser.js",
 	"Documentor.js",
-	"Indexer.js"
+	"Indexer.js",
+	"Analyzer.js"
 );

@@ -1,6 +1,6 @@
 //* @protected
 enyo.kind({
-	name: "BaseLexer",
+	name: "AbstractLexer",
 	kind: null,
 	constructor: function(inText) {
 		if (inText) {
@@ -94,7 +94,7 @@ enyo.kind({
 
 enyo.kind({
 	name: "Lexer",
-	kind:  BaseLexer,
+	kind: AbstractLexer,
 	symbols: "(){}[];,:<>+-=*/&",
 	operators: [ "++", "--", "+=", "-=", "==", "!=", "<=", ">=", "===", "&&", "||", '"', "'"],
 	keywords: [ "function", "new", "return", "if", "else", "while", "do", "break", "continue", "switch", "case", "var" ],

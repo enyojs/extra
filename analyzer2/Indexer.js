@@ -9,27 +9,45 @@ enyo.kind({
 		return Documentor.findByName(this.objects, inName);
 	},
 	addModules: function(inModules) {
-		// add the modules to the master object database
-		this.objects = this.objects.concat(inModules);
-		// index the modules
-		enyo.forEach(this.objects, this.indexModule, this);
+		enyo.forEach(inModules, this.addModule, this);
+		// sort (?!)
+		this.objects.sort(Indexer.nameCompare);
+	},
+	addModule: function(inModule) {
+		// indexing and merging have to be separated so we can
+		// index 'in-progress' modules without adding them to the
+		// database
+		this.indexModule(inModule);
+		this.mergeModule(inModule);
+	},
+	mergeModule: function(inModule) {
+		// add this module to the database
+		this.objects.push(inModule);
+		// add the module objects to the database
+		this.objects = this.objects.concat(inModule.objects);
+		// add the module objects' properties to the database
+		enyo.forEach(inModule.objects, this.mergeProperties, this);
+	},
+	mergeProperties: function(inObject) {
+		if (inObject.properties) {
+			this.objects = this.objects.concat(inObject.properties);
+		}
 	},
 	indexModule: function(inModule) {
 		// this object is type: "module"
 		inModule.type = "module";
 		// name this module
-		inModule.name = inModule.rawPath;
+		inModule.name = inModule.name || inModule.rawPath;
 		// parse module objects
 		inModule.objects = new Documentor(new Parser(new Lexer(inModule.code)));
-		// add the module objects to the database
-		this.objects = this.objects.concat(inModule.objects);
 		// index module objects
+		this.indexObjects(inModule);
+	},
+	indexObjects: function(inModule) {
 		enyo.forEach(inModule.objects, function(o) {
 			o.module = inModule;
 			this.indexObject(o);
 		}, this);
-		// sort!
-		this.objects.sort(Indexer.nameCompare);
 	},
 	indexObject: function(inObject) {
 		switch (inObject.type) {
@@ -40,9 +58,12 @@ enyo.kind({
 		this.indexProperties(inObject);
 	},
 	indexKind: function(o) {
+		// build a flat list of component declarations
+		this.listComponents(o);
+		// discover superkinds and inherited properties
 		this.indexInheritance(o);
-		// append published properties to main property list
 		/*
+		// append published properties to main property list
 		var i = Documentor.indexByName(o.properties, "published");
 		if (i >= 0) {
 			var pp = o.properties[i];
@@ -53,12 +74,6 @@ enyo.kind({
 				p.group = "published";
 				o.properties.splice(i, 0, p);
 			}
-		}
-		var i = Documentor.indexByName(o.properties, "components");
-		if (i >= 0) {
-			var pp = o.properties[i];
-			o.properties.splice(i, 1);
-			o.components = pp;
 		}
 		*/
 	},
@@ -81,25 +96,25 @@ enyo.kind({
 		}
 		return supers;
 	},
-	listInheritedProperties: function(inKind) {
+	listInheritedProperties: function(o) {
 		var all = [], map = {};
 		// walk up the inheritance chain from the basest base
-		for (var i=inKind.superkinds.length - 1, n; n=inKind.superkinds[i]; i--) {
+		for (var i=o.superkinds.length - 1, n; n=o.superkinds[i]; i--) {
 			// find the superkind properties
 			var sk = this.findByName(n);
 			if (sk) {
 				// merge the superkind properties
-				this.mergeProperties(sk.properties, map, all);
+				this.mergeInheritedProperties(sk.properties, map, all);
 			}
 		}
 		// merge the kind's own properties
-		this.mergeProperties(inKind.properties, map, all);
+		this.mergeInheritedProperties(o.properties, map, all);
 		// default sort
 		all.sort(Indexer.nameCompare);
 		// return the list
 		return all;
 	},
-	mergeProperties: function(inProperties, inMap, inAll) {
+	mergeInheritedProperties: function(inProperties, inMap, inAll) {
 		for (var j=0, p; p=inProperties[j]; j++) {
 			// look for overridden property
 			var old = inMap.hasOwnProperty(p.name) && inMap[p.name];
@@ -116,18 +131,65 @@ enyo.kind({
 			inMap[p.name] = p;
 		}
 	},
+	listComponents: function(o) {
+		// produce a list of components owned by 'o' as specified by 'components' property
+		o.components = this._listComponents(o, [], {});
+	},
+	_listComponents: function(o, list, map) {
+		// if 'components' exists, it's a property with a block value
+		var c$ = Documentor.findByName(o.properties, "components");
+		if (c$ && c$.value && c$.value.length) {
+			// the array of properties in the block value
+			var p$ = c$.value[0].properties;
+			for (var i=0, p; p=p$[i]; i++) {
+				// each p is a config block, find the 'name' and 'kind' properties, if they exist
+				var n = Documentor.findByName(p.properties, "name");
+				if (n) {
+					n = Documentor.stripQuotes(n.value[0].token || "");
+				}
+				var k = Documentor.findByName(p.properties, "kind");
+				// FIXME: default kind is 'Control' only if the DOM package is loaded
+				k = Documentor.stripQuotes(k && k.value[0].token || "Control");
+				// in Component, anonymous sub-components are named by enumerating kinds, recreate that here
+				if (!n) {
+					// only grab the last bit of the namespace
+					var ns = k.split(".").pop();
+					// uncap the first letter
+					n = enyo.uncap(ns);
+					// enumerate multiple instances of one kind (kind, kind2, kind3 ...)
+					if (map[n]) {
+						n += ++map[n]
+					} else {
+						map[n] = 1;
+					}
+				}
+				// make a note of the kind and processed name
+				p.kind = k;
+				p.name = n;
+				// add this entry in our list
+				list.push(p);
+				// sub-component definitions are owned by the top-level object
+				this._listComponents(p, list, map);
+			}
+		}
+		return list;
+	},
 	indexProperties: function(inObject) {
 		enyo.forEach(inObject.properties, function(p) {
 			p.object = inObject;
-			this.objects.push(p);
+			p.topic = p.object.name ? p.name + "::" + p.object.name : p.name;
+			//p.topic = p.object.module ? p.object.module.name + "::" + p.name : p.name;
+			//this.objects.push(p);
 		}, this);
 	},
 	statics: {
 		nameCompare: function(inA, inB) {
-			if (inA.name < inB.name) {
+			var na = inA.name.toLowerCase(), 
+				nb = inB.name.toLowerCase();
+			if (na < nb) {
 				return -1;
 			}
-			if (inA.name > inB.name) {
+			if (na > nb) {
 				return 1;
 			} 
 			return 0;

@@ -136,6 +136,7 @@
 				for (var i=0, o; o=this.indexer.objects[i]; i++) {
 					var name = o.name;
 					var object = o.object && o.object.name;
+					//var caption = "<topic>" + (o.topic || o.name) + "</topic>"; 
 					var module = o.module && o.module.name /*|| o.object && o.object.module && o.object.module.name*/;
 					var caption = "<topic>" + o.name + "</topic>" + (object ? ": " + object : "") + (module ? " [" + module + "]" : "");
 					this.createComponent({Xtag: "topic", container: this.$.index, allowHtml: true, content: caption + "<br/>", object: o, ontap: "objectTap"});
@@ -148,6 +149,9 @@
 			},
 			moduleTap: function(inSender) {
 				this.document(inSender.module);
+			},
+			objectTap: function(inSender) {
+				this.document(inSender.object && (inSender.object.module || inSender.object.object && inSender.object.object.module) || inSender.object);
 			},
 			document: function(inModule) {
 				this.$.code.setContent(inModule.code);
