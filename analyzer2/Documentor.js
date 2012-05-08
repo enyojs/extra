@@ -133,8 +133,11 @@ enyo.kind({
 		var nodes = node.children;
 		if (nodes) {
 			var elts = [];
-			for (var i=0, n; n=nodes[i]; i++) {
-				elts.push(this.walkValue(new Iterator(n.children)));
+			for (var i=0, n, v; n=nodes[i]; i++) {
+				v = this.walkValue(new Iterator(n.children));
+				if (v) {
+					elts.push(v);
+				}
 			}
 			obj.properties = elts;
 		}
@@ -221,13 +224,19 @@ enyo.kind({
 		return md;
 	},
 	statics: {
-		indexByName: function(inObjects, inName) {
+		indexByProperty: function(inObjects, inProperty, inValue) {
 			for (var i=0, o; o=inObjects[i]; i++) {
-				if (o.name == inName) {
+				if (o[inProperty] == inValue) {
 					return i;
 				}
 			}
 			return -1;
+		},
+		findByProperty: function(inObjects, inProperty, inValue) {
+			return inObjects[this.indexByProperty(inObjects, inProperty, inValue)];
+		},
+		indexByName: function(inObjects, inName) {
+			return this.indexByProperty(inObjects, "name", inName);
 		},
 		findByName: function(inObjects, inName) {
 			return inObjects[this.indexByName(inObjects, inName)];

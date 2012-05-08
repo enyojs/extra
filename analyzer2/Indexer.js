@@ -6,7 +6,10 @@ enyo.kind({
 		this.objects = [];
 	},
 	findByName: function(inName) {
-		return Documentor.findByName(this.objects, inName);
+		return Documentor.findByProperty(this.objects, "name", inName);
+	},
+	findByTopic: function(inTopic) {
+		return Documentor.findByProperty(this.objects, "topic", inTopic);
 	},
 	addModules: function(inModules) {
 		enyo.forEach(inModules, this.addModule, this);
@@ -14,9 +17,13 @@ enyo.kind({
 		this.objects.sort(Indexer.nameCompare);
 	},
 	addModule: function(inModule) {
-		// indexing and merging have to be separated so we can
-		// index 'in-progress' modules without adding them to the
-		// database
+		//
+		// "indexing" refers to normalizing object records and resolving references.
+		// "merging" refers to adding the normalized records to the master database.
+		//
+		// indexing and merging have to be separated so we can index 'in-progress' modules 
+		// without adding them to the database
+		//
 		this.indexModule(inModule);
 		this.mergeModule(inModule);
 	},
@@ -31,6 +38,10 @@ enyo.kind({
 	mergeProperties: function(inObject) {
 		if (inObject.properties) {
 			this.objects = this.objects.concat(inObject.properties);
+		} 
+		// globals
+		else if (inObject.value && inObject.value[0] && inObject.value[0].properties /*&& inObject.value[0].properties[0] != undefined*/) {
+			this.objects = this.objects.concat(inObject.value[0].properties);
 		}
 	},
 	indexModule: function(inModule) {
@@ -56,6 +67,18 @@ enyo.kind({
 				break;
 		}
 		this.indexProperties(inObject);
+	},
+	indexProperties: function(inObject) {
+		var p$ = inObject.properties || (inObject.value && inObject.value[0] && inObject.value[0].properties);
+		enyo.forEach(p$, function(p) {
+			p.object = inObject;
+			p.topic = p.object.name ? p.object.name + "::" + p.name : p.name;
+			/*
+			if (p.value && p.value[0] && p.value[0].properties) {
+				this.indexProperties(p.value[0].properties);
+			}
+			*/
+		}, this);
 	},
 	indexKind: function(o) {
 		// build a flat list of component declarations
@@ -173,14 +196,6 @@ enyo.kind({
 			}
 		}
 		return list;
-	},
-	indexProperties: function(inObject) {
-		enyo.forEach(inObject.properties, function(p) {
-			p.object = inObject;
-			p.topic = p.object.name ? p.name + "::" + p.object.name : p.name;
-			//p.topic = p.object.module ? p.object.module.name + "::" + p.name : p.name;
-			//this.objects.push(p);
-		}, this);
 	},
 	statics: {
 		nameCompare: function(inA, inB) {
