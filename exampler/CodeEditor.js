@@ -21,7 +21,7 @@ enyo.kind({
 	},
 	receive: function(inSender, inCode) {
 		this.setValue(inCode);
-		this.doLoad(inCode);
+		this.doLoad({code: inCode});
 	},
 	valueChanged: function() {
 		this.setAttribute("value", this.value);
