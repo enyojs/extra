@@ -220,7 +220,7 @@ enyo.kind({
 		// Remove leading indent so markdown spacing is intact.
 		// Assumes first non-empty line in comment is block-left.
 		var md = Documentor.removeIndent(comment);
-		md = md.replace("<", "&lt;");
+		//md = md.replace("<", "&lt;");
 		return md;
 	},
 	statics: {
