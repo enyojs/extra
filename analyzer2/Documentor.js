@@ -29,6 +29,7 @@ enyo.kind({
 					// closure
 					var fn = node.children[0];
 					if (fn.children && fn.children.length == 2) {
+						var args = fn.children[0];
 						var body = fn.children[1];
 						var objs = this.walk(new Iterator(body.children));
 						// add whatever was in the closure to the main object list
@@ -116,6 +117,9 @@ enyo.kind({
 			else if (node.kind == "array") {
 				return this.cook_array(it);
 			}
+			else if (node.kind == "function") {
+				return this.cook_function(it);
+			}
 			else {
 				var obj = this.make("expression", node);
 				var t = node.token;
@@ -126,6 +130,12 @@ enyo.kind({
 				return obj;
 			}
 		}
+	},
+	cook_function: function(it) {
+		var node = it.value;
+		var obj = this.make("expression", node);
+		obj.arguments = enyo.map(node.children[0].children, function(n) { return n.token });
+		return obj;
 	},
 	cook_array: function(it) {
 		var node = it.value;
