@@ -29,7 +29,6 @@ enyo.kind({
 					// closure
 					var fn = node.children[0];
 					if (fn.children && fn.children.length == 2) {
-						var args = fn.children[0];
 						var body = fn.children[1];
 						var objs = this.walk(new Iterator(body.children));
 						// add whatever was in the closure to the main object list
