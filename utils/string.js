@@ -16,16 +16,5 @@ enyo.string = {
 			inString = inString.substr(0, l);
 		}
 		return inString;
-	},
-	//* Encode a string to Base64
-	toBase64: function(inText) { return window.btoa(inText); },
-	//* Decode string from Base64. Throws exception on bad input.
-	fromBase64: function(inText) { return window.atob(inText); }
-};
-
-if (!(window.btoa && window.atob)) {
-	enyo.string.toBase64 = enyo.string.fromBase64 = function(inText) {
-		enyo.error("Your browser does not support native base64 operations");
-		return inText;
-	};
+	}
 };
