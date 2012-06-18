@@ -46,12 +46,22 @@ runtimeMachine = {
 			src: inPath
 		});
 		var self = this;
-		elt.onload = function() {
-			self._loaded(inPath);
-		};
-		elt.onerror = function() {
-			self._error(inPath);
-		};
+		if (enyo.platform.ie && enyo.platform.ie <= 8) {
+			elt.onreadystatechange = function() {
+				if (elt.readyState === 'complete' || elt.readyState === 'loaded') {
+					elt.onreadystatechange = "";
+					self._loaded(inPath);
+				}
+			};
+		}
+		else {
+			elt.onload = function() {
+				self._loaded(inPath);
+			};
+			elt.onerror = function() {
+				self._error(inPath);
+			};
+		}
 	},
 	_continue: function() {
 		this._inflight = false;
