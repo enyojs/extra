@@ -8,13 +8,13 @@ enyo.kind({
 		isApiReady: false,
 		apiReady: function() {
 			enyo.YouTube.isApiReady = true;
-			enyo.Signals.send("ApiReady");
+			enyo.Signals.send("onApiReady");
 		},
 		url: "http://gdata.youtube.com/feeds/api/videos/",
 		search: function(inSearchText, inRelated) {
 			var url = this.url + (inRelated ? inSearchText + "/related" : "");
-			var params = {q: inRelated ? null : inSearchText, alt: "json", format: 5};
-			return new enyo.Ajax({url: url})
+			var params = {q: inRelated ? null : inSearchText, alt: "json-in-script", format: 5};
+			return new enyo.JsonpRequest({url: url})
 				.go(params)
 				.response(this, "processResponse")
 				;
