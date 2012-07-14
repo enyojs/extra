@@ -13,7 +13,7 @@ enyo.kind({
 	walk: function(it, inState) {
 		var objects = [], node, obj;
 		while (it.next()) {
-			var node = it.value;
+			node = it.value;
 			if (node.kind == "comment") {
 				this.cook_comment(node.token);
 			} 
@@ -48,9 +48,9 @@ enyo.kind({
 	cook_kind: function(it) {
 		// Get inProps[name].value[0].token
 		var val = function(inProps, inName) {
-			var i = Documentor.indexByName(inProps, inName);
+			var i = Documentor.indexByName(inProps, inName), p;
 			if (i >= 0) {
-				var p = inProps[i];
+				p = inProps[i];
 				inProps.splice(p, 1);
 			}
 			return p && p.value && p.value.length && p.value[0].token;
@@ -104,12 +104,12 @@ enyo.kind({
 	},
 	walkValue: function(it, inState) {
 		while (it.next()) {
-			var node = it.value;
+			var node = it.value, obj;
 			if (node.kind == "comment") {
 				this.cook_comment(node.token);
 			}
 			else if (node.kind == "block") {
-				var obj = this.make("block", node);
+				obj = this.make("block", node);
 				obj.properties = this.cook_block(node.children);
 				return obj;
 			}
@@ -120,11 +120,11 @@ enyo.kind({
 				return this.cook_function(it);
 			}
 			else {
-				var obj = this.make("expression", node);
+				obj = this.make("expression", node);
 				var t = node.token;
 				while (it.next()) {
 					t += it.value.token;
-				};
+				}
 				obj.token = t;
 				return obj;
 			}
@@ -133,7 +133,7 @@ enyo.kind({
 	cook_function: function(it) {
 		var node = it.value;
 		var obj = this.make("expression", node);
-		obj.arguments = enyo.map(node.children[0].children, function(n) { return n.token });
+		obj['arguments'] = enyo.map(node.children[0].children, function(n) { return n.token; });
 		return obj;
 	},
 	cook_array: function(it) {
@@ -214,7 +214,7 @@ enyo.kind({
 		return pragmas;
 	},
 	honorPragmas: function(inPragmas) {
-		var groups = {protected: 1, public: 1};
+		var groups = {'protected': 1, 'public': 1};
 		for (var i=0, p; p=inPragmas[i]; i++) {
 			if (groups[p]) {
 				//console.log(p);
@@ -262,7 +262,8 @@ enyo.kind({
 		removeIndent: function(inString) {
 			var indent = 0;
 			var lines = inString.split(/\r?\n/);
-			for (var i=0, l; (l=lines[i]) != null; i++) {
+			var i, l;
+			for (i=0; (l=lines[i]) != null; i++) {
 				if (l.length > 0) {
 					indent = l.search(/\S/);
 					if (indent < 0) {
@@ -272,7 +273,7 @@ enyo.kind({
 				}
 			}
 			if (indent) {
-				for (var i=0, l; (l=lines[i]) != null; i++) {
+				for (i=0; (l=lines[i]) != null; i++) {
 					lines[i] = l.slice(indent);
 				}
 			}

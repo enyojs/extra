@@ -11,14 +11,26 @@ enyo.kind({
 	analyze: function(inPaths) {
 		this.walk(inPaths);
 	},
+	// inPaths is either an array of strings or an array of
+	// objects with path and label fields.  If labels are
+	// provided, the objects from the analysis for that path
+	// are tagged with a label property
 	walk: function(inPaths) {
 		var modules = [];
+		var currentLabel;
 		var next = function(inSender, inData) {
 			if (inData) {
+				for (var i = 0; i < inData.modules.length; ++i) {
+					inData.modules[i].label = currentLabel;
+				}
 				modules = modules.concat(inData.modules);
 			}
-			var path = inPaths.shift();
+			var path = inPaths.shift(), label = '';
 			if (path) {
+				if (!enyo.isString(path)) {
+					currentLabel = path.label;
+					path = path.path;
+				}
 				new Walker().walk(path).response(this, next);
 			} else {
 				this.walkFinished(modules);
