@@ -59,6 +59,11 @@ enyo.kind({
 				else if (node.token == "[") {
 					node.kind = "array";
 					node.children = this.walk(it, node.kind);
+					if (it.value) {
+						node.end = it.value.end;
+					} else {
+						console.log("No end token for array?");
+					}
 				}
 				else if (inState == "expression" && node.token == "]") {
 					return nodes;
@@ -81,6 +86,11 @@ enyo.kind({
 				else if (node.token == "{") {
 					node.kind = "block";
 					node.children = this.walk(it, node.kind);
+					if (it.value) {
+						node.end = it.value.end;
+					} else {
+						console.log("No end token for block?");
+					}
 					if (inState == "expression" || inState == "function") {
 						// a block terminates an expression
 						nodes.push(node);
