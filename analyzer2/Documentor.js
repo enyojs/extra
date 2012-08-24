@@ -143,9 +143,11 @@ enyo.kind({
 		if (nodes) {
 			var elts = [];
 			for (var i=0, n, v; n=nodes[i]; i++) {
-				v = this.walkValue(new Iterator(n.children));
-				if (v) {
-					elts.push(v);
+				if (n.children) {   // Skip nodes without children such as comments
+					v = this.walkValue(new Iterator(n.children));
+					if (v) {
+						elts.push(v);
+					}
 				}
 			}
 			obj.properties = elts;
