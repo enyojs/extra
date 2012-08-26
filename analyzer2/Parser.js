@@ -52,7 +52,9 @@ enyo.kind({
 					};
 					// if the token that terminated the expression was a ']', close the array
 					if (it.value && it.value.token == "]") {
-						nodes.push(node);
+						if (node.children.length) { // only push the node if it's got children
+							nodes.push(node);
+						}
 						return nodes;
 					}
 				}
