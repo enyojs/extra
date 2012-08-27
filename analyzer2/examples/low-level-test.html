@@ -22,10 +22,12 @@
 </head>
 <body>
 	<script id="Xtest">
-	   var o = {
+	   var parent = {
 			components: [
-			{kind: "nard"},
-			{kind: "foo"},
+			  {kind: "nard"},
+			  {kind: "child", components: [
+			     {kind: "inner"}
+			  ]}
 			]
 	};
 	</script>
@@ -176,7 +178,7 @@
 		dumpTokens = function(inTokens) {
 			w("<pre>");
 			for (var i=0, t; t=inTokens[i]; i++) {
-				w("<i>" + t.kind + "</i>: ");
+				w("<i>" + t.kind + "</i>: start:" + t.start + " end:"+t.end);
 				w("<blockquote><span style='background-color:lightblue; padding: 4px;'>");
 				w(t.token.replace(/\</g, "&lt;").replace(/\>/g, "&gt;"));
 				w("</span></blockquote>");
@@ -184,16 +186,16 @@
 			w("</pre>");
 		}
 		//
-		dumpNodes = function(inNodes) {
+		dumpNodes = function(inNodes, source) {
 			var it = new Iterator(inNodes);
 			while (it.next()) {
 				//console.log(it.value);
 				w("<i>" + it.value.kind + "</i>: ");
-				w(it.value.token);
+				w(it.value.token + " start: " + it.value.start + " end: " + it.value.end);
 				w("<br/>");
 				if (it.value.children) {
 					w("<blockquote>");
-					dumpNodes(it.value.children);
+					dumpNodes(it.value.children, source);
 					w("</blockquote><-<br/>");
 				}
 			}
@@ -267,7 +269,7 @@
 		var nodes = new Parser(tokens);
 		console.dir(nodes);
 		w('Parser: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
-		dumpNodes(nodes);
+		dumpNodes(nodes, s.text);
 		w('</div>');
 		//
 		w('<br/>');
