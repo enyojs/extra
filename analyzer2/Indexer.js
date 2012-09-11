@@ -157,6 +157,12 @@ enyo.kind({
 	listComponents: function(o) {
 		// produce a list of components owned by 'o' as specified by 'components' property
 		o.components = this._listComponents(o, [], {});
+		// add componentsBlockStart and componentsBlockEnd properties for Ares
+		var c$ = Documentor.findByName(o.properties, "components");
+		if (c$ && c$.value) {
+			o.componentsBlockStart = c$.value[0].start;
+			o.componentsBlockEnd = c$.value[0].end;
+		}
 	},
 	_listComponents: function(o, list, map) {
 		// if 'components' exists, it's a property with a block value
