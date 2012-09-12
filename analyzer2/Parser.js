@@ -44,6 +44,7 @@ enyo.kind({
 					// we haven't actually used it.value yet, but we are about to initiate another walk, which will advance the stream pointer
 					// put it.value back so we don't lose it
 					it.prev();
+					var saved = it.value;
 					// we collect each element as an object
 					node = {
 						kind: "element",
@@ -51,7 +52,8 @@ enyo.kind({
 						children: this.walk(it, "expression")
 					};
 					// if the token that terminated the expression was a ']', close the array
-					if (it.value && it.value.token == "]") {
+					// Do the same if we couldn't parse the children, for whatever reason (usually, a syntax error)
+					if ((it.value && it.value.token == "]") || (it.value && it.value === saved)) {
 						if (node.children.length) { // only push the node if it's got children
 							nodes.push(node);
 						}
