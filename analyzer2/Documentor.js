@@ -1,9 +1,11 @@
 enyo.kind({
 	name: "Documentor",
-	kind: null,
+	kind: "AnalyzerDebug",
 	group: "public",
 	constructor: function(inTokens) {
 		this.comment = [];
+		// Debug mode is off by default. Could be dynamically turn on by calling AnalyzerDebug._debugEnabled = true;
+		this.debug = AnalyzerDebug._debugEnabled;
 		return this.parse(inTokens);
 	},
 	parse: function(inTokens) {
@@ -12,8 +14,10 @@ enyo.kind({
 	},
 	walk: function(it, inState) {
 		var objects = [], node, obj;
+		if (this.debug) this.logMethodEntry(it, "inState " + inState + " >>" + JSON.stringify(it.value) + "<<");
 		while (it.next()) {
 			node = it.value;
+			if (this.debug) this.logProcessing(it, node);
 			if (node.kind == "comment") {
 				this.cook_comment(node.token);
 			} 
@@ -43,9 +47,11 @@ enyo.kind({
 				obj = null;
 			}
 		}
+		if (this.debug) this.logMethodExit(it);
 		return objects;
 	},
 	cook_kind: function(it) {
+		if (this.debug) this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
 		// Get inProps[name].value[0].token
 		var val = function(inProps, inName) {
 			var i = Documentor.indexByName(inProps, inName), p;
@@ -84,11 +90,14 @@ enyo.kind({
 			// remove excess value nodes
 			//flatten(obj.properties, "published");
 		}
+		if (this.debug) this.logMethodExit(it);
 		return obj;
 	},
 	cook_block: function(inNodes) {
+		if (this.debug) this.logMethodEntry();
 		var props = [];
 		for (var i=0, n; n=inNodes[i]; i++) {
+			if (this.debug) this.logProcessing(null, n);
 			if (n.kind == "comment") {
 				this.cook_comment(n.token);
 			}
@@ -100,24 +109,32 @@ enyo.kind({
 				props.push(prop);
 			}
 		}
+		if (this.debug) this.logMethodExit();
 		return props;
 	},
 	walkValue: function(it, inState) {
+		if (this.debug) this.logMethodEntry(it, "inState: " + inState + " >>" + JSON.stringify(it.value) + "<<");
 		while (it.next()) {
 			var node = it.value, obj;
+			if (this.debug) this.logProcessing(it, node);
 			if (node.kind == "comment") {
 				this.cook_comment(node.token);
 			}
 			else if (node.kind == "block") {
 				obj = this.make("block", node);
 				obj.properties = this.cook_block(node.children);
+				if (this.debug) this.logMethodExit(it, "inState: " + inState + " >>" + JSON.stringify(it.value) + "<<");
 				return obj;
 			}
 			else if (node.kind == "array") {
-				return this.cook_array(it);
+				obj = this.cook_array(it);
+				if (this.debug) this.logMethodExit(it);
+				return obj;
 			}
 			else if (node.kind == "function") {
-				return this.cook_function(it);
+				obj = this.cook_function(it);
+				if (this.debug) this.logMethodExit(it, "inState: " + inState + " >>" + JSON.stringify(it.value) + "<<");
+				return obj;
 			}
 			else {
 				obj = this.make("expression", node);
@@ -126,17 +143,22 @@ enyo.kind({
 					t += it.value.token;
 				}
 				obj.token = t;
+				if (this.debug) this.logMethodExit(it);
 				return obj;
 			}
 		}
+		if (this.debug) this.logMethodExit(it);
 	},
 	cook_function: function(it) {
+		if (this.debug) this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
 		var node = it.value;
 		var obj = this.make("expression", node);
 		obj['arguments'] = enyo.map(node.children[0].children, function(n) { return n.token; });
+		if (this.debug) this.logMethodExit(it);
 		return obj;
 	},
 	cook_array: function(it) {
+		if (this.debug) this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
 		var node = it.value;
 		var obj = this.make("array", node);
 		var nodes = node.children;
@@ -152,9 +174,11 @@ enyo.kind({
 			}
 			obj.properties = elts;
 		}
+		if (this.debug) this.logMethodExit(it);
 		return obj;
 	},
 	cook_assignment: function(it) {
+		if (this.debug) this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
 		var node = it.value;
 		var obj = this.make("global", node);
 		if (node.children) {
@@ -163,6 +187,7 @@ enyo.kind({
 			}
 			obj.value = [this.walkValue(new Iterator(node.children))];
 		}
+		if (this.debug) this.logMethodExit();
 		return obj;
 	},
 	make: function(inType, inNode) {
@@ -188,6 +213,7 @@ enyo.kind({
 	// * some are pragmas are read and acted on
 	// * other comments are collected and attached to the next emitted node
 	cook_comment: function(inToken) {
+		if (this.debug) this.logMethodEntry();
 		var m = inToken.match(this.commentRx);
 		if (m) {
 			m = m[1] ? m[1] : m[2]; 
@@ -196,6 +222,7 @@ enyo.kind({
 			// act on pragmas
 			this.honorPragmas(p);
 		}
+		if (this.debug) this.logMethodExit();
 	},
 	extractPragmas: function(inString) {
 		var pragmaRx = /^[*\s]*@[\S\s]*/g,

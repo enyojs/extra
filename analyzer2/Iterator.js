@@ -4,8 +4,13 @@ enyo.kind({
 	i: -1,
 	nodes: null,
 	constructor: function(inStream) {
+		// Assign a unique ID to each Iterator
+		this.ID = Iterator._objectCount++;
 		this.stream = inStream;
 	},
+    statics: {
+    	_objectCount: 0		// For debugging purpose
+    },
 	next: function() {
 		this.i++;
 		return this._read();

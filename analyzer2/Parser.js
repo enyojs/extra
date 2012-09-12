@@ -1,7 +1,9 @@
 enyo.kind({
 	name: "Parser",
-	kind: null,
+	kind: "AnalyzerDebug",
 	constructor: function(inTokens) {
+		// Debug mode is off by default. Could be dynamically turn on by calling AnalyzerDebug._debugEnabled = true;
+		this.debug = AnalyzerDebug._debugEnabled;
 		return this.parse(inTokens);
 	},
 	parse: function(inTokens) {
@@ -25,10 +27,12 @@ enyo.kind({
 		return r;
 	},
 	walk: function(it, inState) {
+		if (this.debug) this.logMethodEntry(it, "inState " + inState + " >>" + JSON.stringify(it.value) + "<<");
 		var nodes = [], node;
 		try {
 			while (it.next()) {
 				node = it.value;
+				if (this.debug) this.logProcessing(it, node);
 				//
 				if (node.kind == "ws") {
 					continue;
@@ -55,6 +59,7 @@ enyo.kind({
 						if (node.children.length) { // only push the node if it's got children
 							nodes.push(node);
 						}
+						if (this.debug) this.logMethodExit(it);
 						return nodes;
 					}
 				}
@@ -68,6 +73,7 @@ enyo.kind({
 					}
 				}
 				else if (inState == "expression" && node.token == "]") {
+					if (this.debug) this.logMethodExit(it);
 					return nodes;
 				}
 				//
@@ -78,6 +84,7 @@ enyo.kind({
 				//
 				// terminals (; or ,)
 				else if (node.kind == "terminal" && (inState == "expression" || inState == "var")) {
+					if (this.debug) this.logMethodExit(it);
 					return nodes;
 				} 
 				else if (node.kind == "terminal") {
@@ -87,7 +94,9 @@ enyo.kind({
 				// block
 				else if (node.token == "{") {
 					node.kind = "block";
+					if (this.debug) this.logIterMsg(it, "PROCESS BLOCK - START");
 					node.children = this.walk(it, node.kind);
+					if (this.debug) this.logIterMsg(it, "PROCESS BLOCK - END");					
 					if (it.value) {
 						node.end = it.value.end;
 					} else {
@@ -96,6 +105,7 @@ enyo.kind({
 					if (inState == "expression" || inState == "function") {
 						// a block terminates an expression
 						nodes.push(node);
+						if (this.debug) this.logMethodExit(it);
 						return nodes;
 					}
 				}
@@ -103,10 +113,12 @@ enyo.kind({
 				else if (inState == "expression" && (node.token == "}" || node.token == ")")) {
 					// put the token back so the calling context can use it
 					it.prev();
+					if (this.debug) this.logMethodExit(it);
 					return nodes;
 				}
 				// close block during block processing
 				else if (inState == "block" && node.token == "}") {
+					if (this.debug) this.logMethodExit(it);
 					return nodes;
 				}
 				//
@@ -132,15 +144,18 @@ enyo.kind({
 					node.children = this.walk(it, node.kind);
 				} 
 				else if (inState == "association" && node.token == ")") {
+					if (this.debug) this.logMethodExit(it);
 					return nodes;
 				}
 				// function keyword
 				else if (node.token == "function") {
 					node.kind = "function";
+					if (this.debug) this.logIterMsg(it, "PROCESS FUNCTION - START");
 					node.children = this.walk(it, node.kind);
 					// if we are not processing an expression, this is an anonymous function or it is using "C-style" naming syntax
 					// "function <name>(){..}"
 					if (inState !== "expression" && node.children && node.children.length && node.children[0].kind == "identifier") {
+						if (this.debug) this.logIterMsg(it, "C-Style function");
 						// tag the function with a name property
 						node.name = node.children[0].token;
 						node.children.shift();
@@ -155,14 +170,17 @@ enyo.kind({
 					if (inState == "expression" || inState == "function") {
 						// a function terminates an expression
 						nodes.push(node);
+						if (this.debug) this.logMethodExit(it);
 						return nodes;
 					}
 				}
+				if (this.debug) this.logIterMsg(it, "PUSH NODE");
 				nodes.push(node);
 			}
 		} catch(x) {
 			console.error(x);
 		}
+		if (this.debug) this.logMethodExit(it);
 		return nodes;
 	}
 });
