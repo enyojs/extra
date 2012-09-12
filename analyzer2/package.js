@@ -1,5 +1,6 @@
 enyo.depends(
 	"runtime-machine.js",
+	"AnalyzerDebug.js",
 	"Walker.js",
 	"Reader.js",
 	"Iterator.js",
