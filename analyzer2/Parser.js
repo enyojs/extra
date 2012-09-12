@@ -96,12 +96,15 @@ enyo.kind({
 					node.kind = "block";
 					if (this.debug) this.logIterMsg(it, "PROCESS BLOCK - START");
 					node.children = this.walk(it, node.kind);
-					if (this.debug) this.logIterMsg(it, "PROCESS BLOCK - END");					
+					if (this.debug) this.logIterMsg(it, "PROCESS BLOCK - END");
 					if (it.value) {
 						node.end = it.value.end;
 					} else {
 						console.log("No end token for block?");
 					}
+					// Check if the block is terminated by a comma			NB: Does not change the iterator
+					node.commaTerminated = this.isCommaTerminated(it);
+					
 					if (inState == "expression" || inState == "function") {
 						// a block terminates an expression
 						nodes.push(node);
@@ -131,6 +134,7 @@ enyo.kind({
 						prev.children = this.walk(it, "expression");
 						// if our expression hit a terminal, don't consume it
 						if (it.value && it.value.kind == "terminal") {
+							prev.commaTerminated = (it.value.token === ',');
 							it.prev();
 						}
 						node = prev;
@@ -149,9 +153,17 @@ enyo.kind({
 				}
 				// function keyword
 				else if (node.token == "function") {
-					node.kind = "function";
+					node.kind = "function";					
 					if (this.debug) this.logIterMsg(it, "PROCESS FUNCTION - START");
 					node.children = this.walk(it, node.kind);
+					if (this.debug) this.logIterMsg(it, "PROCESS FUNCTION - END");
+					
+					if (it.value && it.value.kind === "symbol" && it.value.token === "}") {
+						// Nothing to to
+					} else {
+						console.log("No end token for function?");
+					}
+					
 					// if we are not processing an expression, this is an anonymous function or it is using "C-style" naming syntax
 					// "function <name>(){..}"
 					if (inState !== "expression" && node.children && node.children.length && node.children[0].kind == "identifier") {
@@ -168,6 +180,9 @@ enyo.kind({
 						node = neo;
 					}
 					if (inState == "expression" || inState == "function") {
+						// Determine if the function is followed by a comma       NB: Does not change the iterator
+						node.commaTerminated = this.isCommaTerminated(it);
+	
 						// a function terminates an expression
 						nodes.push(node);
 						if (this.debug) this.logMethodExit(it);
@@ -182,5 +197,19 @@ enyo.kind({
 		}
 		if (this.debug) this.logMethodExit(it);
 		return nodes;
+	},
+	isCommaTerminated: function(it) {
+		/*
+		 * This function read the next value
+		 * Check if it's a comma
+		 * Put back the value in the iterator
+		 */
+		commaPresent = false;
+		var item = it.next(); // Get next token to check if it's a comma
+		if (item) {
+			commaPresent = (item.kind === 'terminal' && item.token === ',');
+		}
+		it.prev(); // put the token back so the calling context can use it
+		return commaPresent;
 	}
 });

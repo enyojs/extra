@@ -14,7 +14,7 @@ enyo.kind({
 	},
 	walk: function(it, inState) {
 		var objects = [], node, obj;
-		if (this.debug) this.logMethodEntry(it, "inState " + inState + " >>" + JSON.stringify(it.value) + "<<");
+		if (this.debug) this.logMethodEntry(it, "inState " + inState + " >>" + JSON.stringify(it.value) + "<<");		
 		while (it.next()) {
 			node = it.value;
 			if (this.debug) this.logProcessing(it, node);
@@ -87,6 +87,8 @@ enyo.kind({
 			if (obj.superkind == "null") {
 				obj.superkind = null;
 			}
+			// Store block information for the kind
+			obj.block = { start: args[0].start, end: args[0].end };
 			// remove excess value nodes
 			//flatten(obj.properties, "published");
 		}
@@ -105,6 +107,14 @@ enyo.kind({
 				var prop = this.make("property", n);
 				if (n.children) {
 					prop.value = [this.walkValue(new Iterator(n.children))];
+					if (n.commaTerminated === undefined) {
+						prop.commaTerminated = n.children[0].commaTerminated || false;
+						if (n.children[0].commaTerminated === undefined) {
+							if (this.debug) this.logMsg("NO COMMA TERMINATED INFO");
+						}
+					} else {
+						prop.commaTerminated = n.commaTerminated;
+					}
 				}
 				props.push(prop);
 			}
@@ -153,6 +163,7 @@ enyo.kind({
 		if (this.debug) this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
 		var node = it.value;
 		var obj = this.make("expression", node);
+		obj.commaTerminated = node.commaTerminated;
 		obj['arguments'] = enyo.map(node.children[0].children, function(n) { return n.token; });
 		if (this.debug) this.logMethodExit(it);
 		return obj;
