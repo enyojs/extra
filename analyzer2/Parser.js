@@ -71,7 +71,7 @@ enyo.kind({
 					if (it.value) {
 						node.end = it.value.end;
 					} else {
-						console.log("No end token for array?");
+						this.logIterMsg(it, "No end token for array?");
 					}
 				}
 				else if (inState == "expression" && node.token == "]") {
@@ -102,7 +102,7 @@ enyo.kind({
 					if (it.value) {
 						node.end = it.value.end;
 					} else {
-						console.log("No end token for block?");
+						this.logIterMsg(it, "No end token for block?");
 					}
 					// Check if the block is terminated by a comma			NB: Does not change the iterator
 					node.commaTerminated = this.isCommaTerminated(it);
@@ -163,7 +163,7 @@ enyo.kind({
 					if (it.value && it.value.kind === "symbol" && it.value.token === "}") {
 						// Nothing to to
 					} else {
-						console.log("No end token for function?");
+						this.logIterMsg(it, "No end token for function?");
 					}
 					
 					// if we are not processing an expression, this is an anonymous function or it is using "C-style" naming syntax
