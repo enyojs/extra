@@ -5,8 +5,38 @@ enyo.kind({
 	constructor: function() {
 		this.objects = [];
 	},
+	debug: false,
 	findByName: function(inName) {
 		return Documentor.findByProperty(this.objects, "name", inName);
+	},
+	/**
+	 * Returns a list of all kind names matching the parameter startingWith
+	 * @param startingWith
+	 * @returns {Array} the list of matching kind name
+	 */
+	getKindList: function(startingWith) {
+		var list = [];
+		for (var i=0, o; o=this.objects[i]; i++) {
+			if (o.type === 'kind' && o.token === 'enyo.kind' && o.group === 'public' && o.name.indexOf(startingWith) === 0) {
+				this.debug && enyo.log("getEnyoKindList --> this.objects[" + i + "]: type: " + o.type + " token: " + o.token + " group: "+ o.group + " name: " + o.name);
+				list.push(o.name);
+			}
+		}
+		return list;
+	},
+	/**
+	 * Returns a list of all function names matching the parameter startingWith
+	 * @param startingWith
+	 * @returns {Array} the list of matching function name
+	 */
+	getFunctionList: function(startingWith) {
+		var list = [];
+		for (var i=0, o; o=this.objects[i]; i++) {
+			if (o.type === 'function' && o.group === 'public' && o.name.indexOf(startingWith) === 0) {
+				list.push(o.name);
+			}
+		}
+		return list;
 	},
 	findByTopic: function(inTopic) {
 		return Documentor.findByProperty(this.objects, "topic", inTopic);
