@@ -9,15 +9,21 @@ enyo.kind({
 	findByName: function(inName) {
 		return Documentor.findByProperty(this.objects, "name", inName);
 	},
+	findByTopic: function(inTopic) {
+		return Documentor.findByProperty(this.objects, "topic", inTopic);
+	},
 	/**
-	 * Returns a list of all kind names matching the parameter startingWith
-	 * @param startingWith
+	 * Returns a list of all kind names matching the parameter nameRegexp
+	 * and the parameter group
+	 * @param nameRegexp
+	 * @param group
 	 * @returns {Array} the list of matching kind name
 	 */
-	getKindList: function(startingWith) {
+	getKindList: function(nameRegexp, group) {
+		this.debug && enyo.log("getEnyoKindList --> result - regexp: " + nameRegexp + " group: " + group);
 		var list = [];
 		for (var i=0, o; o=this.objects[i]; i++) {
-			if (o.type === 'kind' && o.token === 'enyo.kind' && o.group === 'public' && o.name.indexOf(startingWith) === 0) {
+			if ((o.type === 'kind') && (o.token === 'enyo.kind') && (o.group === group) && nameRegexp.test(o.name)) {
 				this.debug && enyo.log("getEnyoKindList --> this.objects[" + i + "]: type: " + o.type + " token: " + o.token + " group: "+ o.group + " name: " + o.name);
 				list.push(o.name);
 			}
@@ -25,21 +31,20 @@ enyo.kind({
 		return list;
 	},
 	/**
-	 * Returns a list of all function names matching the parameter startingWith
-	 * @param startingWith
+	 * Returns a list of all function names matching the parameter nameRegexp
+	 * and the parameter group
+	 * @param nameRegexp
+	 * @param group
 	 * @returns {Array} the list of matching function name
 	 */
-	getFunctionList: function(startingWith) {
+	getFunctionList: function(nameRegexp, group) {
 		var list = [];
 		for (var i=0, o; o=this.objects[i]; i++) {
-			if (o.type === 'function' && o.group === 'public' && o.name.indexOf(startingWith) === 0) {
+			if ((o.type === 'function') && (o.group === group) && nameRegexp.test(o.name)) {
 				list.push(o.name);
 			}
 		}
 		return list;
-	},
-	findByTopic: function(inTopic) {
-		return Documentor.findByProperty(this.objects, "topic", inTopic);
 	},
 	addModules: function(inModules) {
 		enyo.forEach(inModules, this.addModule, this);
