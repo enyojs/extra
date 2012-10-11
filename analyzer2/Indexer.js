@@ -47,8 +47,8 @@ enyo.kind({
 	indexModule: function(inModule) {
 		// this object is type: "module"
 		inModule.type = "module";
-		// name this module
-		inModule.name = inModule.name || inModule.rawPath;
+		// name this module by incorporating the path so its unique
+		inModule.name = inModule.path? inModule.path.replace("lib/", ""): inModule.label + "/" + inModule.rawPath;
 		// parse module objects
 		inModule.objects = new Documentor(new Parser(new Lexer(inModule.code)));
 		// index module objects
