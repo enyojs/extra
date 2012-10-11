@@ -21,8 +21,12 @@ enyo.kind({
 			throw new Error();
 		} catch(error) {
 			var stack = error.stack;
-			var lines = stack.split('\n');
-			return lines[level];
+			if (stack) {
+				var lines = stack.split('\n');
+				return lines[level];
+			} else {
+				return "(stack trace not available)";
+			}
 		}
 	},
 	showLevel: function() {
