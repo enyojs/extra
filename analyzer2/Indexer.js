@@ -13,38 +13,12 @@ enyo.kind({
 		return Documentor.findByProperty(this.objects, "topic", inTopic);
 	},
 	/**
-	 * Returns a list of all kind names matching the parameter nameRegexp
-	 * and the parameter group
-	 * @param nameRegexp
-	 * @param group
-	 * @returns {Array} the list of matching kind name
-	 */
-	getKindList: function(nameRegexp, group) {
-		this.debug && enyo.log("getEnyoKindList --> result - regexp: " + nameRegexp + " group: " + group);
-		var list = [];
-		for (var i=0, o; o=this.objects[i]; i++) {
-			if ((o.type === 'kind') && (o.token === 'enyo.kind') && (o.group === group) && nameRegexp.test(o.name)) {
-				this.debug && enyo.log("getEnyoKindList --> this.objects[" + i + "]: type: " + o.type + " token: " + o.token + " group: "+ o.group + " name: " + o.name);
-				list.push(o.name);
-			}
-		}
-		return list;
-	},
-	/**
-	 * Returns a list of all function names matching the parameter nameRegexp
-	 * and the parameter group
-	 * @param nameRegexp
-	 * @param group
-	 * @returns {Array} the list of matching function name
-	 */
-	getFunctionList: function(nameRegexp, group) {
-		var list = [];
-		for (var i=0, o; o=this.objects[i]; i++) {
-			if ((o.type === 'function') && (o.group === group) && nameRegexp.test(o.name)) {
-				list.push(o.name);
-			}
-		}
-		return list;
+		Creates a new array with all elements of _inArray_ that pass the test implemented by _inFunc_.
+		If _inContext_ is specified, _inFunc_ is called with _inContext_ as _this_.
+	*/
+	search: function(inFilterFn, inMapFn, inContext) {
+		var values = enyo.filter(this.objects, inFilterFn, inContext);
+		return enyo.map(values, inMapFn, inContext);
 	},
 	addModules: function(inModules) {
 		enyo.forEach(inModules, this.addModule, this);
