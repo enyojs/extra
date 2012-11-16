@@ -12,6 +12,14 @@ enyo.kind({
 	findByTopic: function(inTopic) {
 		return Documentor.findByProperty(this.objects, "topic", inTopic);
 	},
+	/**
+		Creates a new array with all elements of _inArray_ that pass the test implemented by _inFunc_.
+		If _inContext_ is specified, _inFunc_ is called with _inContext_ as _this_.
+	*/
+	search: function(inFilterFn, inMapFn, inContext) {
+		var values = enyo.filter(this.objects, inFilterFn, inContext);
+		return enyo.map(values, inMapFn, inContext);
+	},
 	addModules: function(inModules) {
 		enyo.forEach(inModules, this.addModule, this);
 		// sort (?!)
