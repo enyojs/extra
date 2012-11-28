@@ -8,9 +8,10 @@ enyo.kind({
 		onProgress: "",
 		onFinish: ""
 	},
-	walk: function(inPath) {
+	walk: function(inPath, inPathResolver) {
+		this.verbose && this.log("inPath: " + inPath + " resolver: ", inPathResolver);
 		// make a new loader
-		this.loader = new enyo.loaderFactory(runtimeMachine);
+		this.loader = new enyo.loaderFactory(runtimeMachine, inPathResolver);
 		// stub out script loader, we only need manifests to walk dependencies
 		this.loader.loadScript = function(){};
 		// stub out stylesheet loader
@@ -20,13 +21,27 @@ enyo.kind({
 		// callbacks
 		this.loader.report = enyo.bind(this, "walkReport");
 		this.loader.finish = enyo.bind(this, "walkFinish");
-		// substitute for default loader
+
+		/*
+			TERRIBLE HACK: substitute for default loader
+			--------------------------------------------
+			If we don't do this the analysis silently fails as "enyo.depends"
+			directly refers to "enyo.loader".
+
+			Not SURE of the impacts especially if the enyo.loader is invoked
+			to load some more application files while the analysis is ongoing.
+		 */
 		enyo.loader = this.loader;
+
 		// walk application dependencies
-		var path = enyo.path.rewrite(inPath);
-		enyo.asyncMethod(enyo.loader, "load", path);
-		//enyo.loader.load(enyo.path.rewrite(inSource));
-		//enyo.depends(inSource);
+		if (inPathResolver) {
+			path = inPathResolver.rewrite(inPath);
+			this.verbose && path !== inPath && this.log("inPathResolver: " + inPath + " ==> " + path);
+		} else {
+			path = enyo.path.rewrite(inPath);
+			this.verbose && path !== inPath && this.log("enyo.path: " + inPath + " ==> " + path);
+		}
+		enyo.asyncMethod(this.loader, "load", path);
 		return this.async = new enyo.Async();
 	},
 	walkReport: function(inAction, inName) {

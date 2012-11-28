@@ -30,9 +30,9 @@ enyo.kind({
 		// "indexing" refers to normalizing object records and resolving references.
 		// "merging" refers to adding the normalized records to the master database.
 		//
-		// indexing and merging have to be separated so we can index 'in-progress' modules 
+		// indexing and merging have to be separated so we can index 'in-progress' modules
 		// without adding them to the database
-		//
+		this.debug && enyo.log("Indexer.addModule(): + " + inModule.path);
 		this.indexModule(inModule);
 		this.mergeModule(inModule);
 	},
@@ -47,7 +47,7 @@ enyo.kind({
 	mergeProperties: function(inObject) {
 		if (inObject.properties) {
 			this.objects = this.objects.concat(inObject.properties);
-		} 
+		}
 		// globals
 		else if (inObject.value && inObject.value[0] && inObject.value[0].properties /*&& inObject.value[0].properties[0] != undefined*/) {
 			this.objects = this.objects.concat(inObject.value[0].properties);
@@ -196,7 +196,7 @@ enyo.kind({
 					n = enyo.uncap(ns);
 					// enumerate multiple instances of one kind (kind, kind2, kind3 ...)
 					if (map[n]) {
-						n += ++map[n]
+						n += ++map[n];
 					} else {
 						map[n] = 1;
 					}
@@ -214,14 +214,14 @@ enyo.kind({
 	},
 	statics: {
 		nameCompare: function(inA, inB) {
-			var na = inA.name.toLowerCase(), 
+			var na = inA.name.toLowerCase(),
 				nb = inB.name.toLowerCase();
 			if (na < nb) {
 				return -1;
 			}
 			if (na > nb) {
 				return 1;
-			} 
+			}
 			return 0;
 		}
 	}
