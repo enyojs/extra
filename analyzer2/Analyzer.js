@@ -1,6 +1,7 @@
 enyo.kind({
 	name: "Analyzer",
 	kind: "Component",
+	debug: false,
 	events: {
 		onIndexReady: ""
 	},
@@ -8,18 +9,38 @@ enyo.kind({
 		this.index = new Indexer();
 		this.inherited(arguments);
 	},
-	analyze: function(inPaths) {
-		this.walk(inPaths);
+	/**
+	 * Analyze all the items of inPaths and add the result to the
+	 * index database.
+	 * @param inPaths: is either an array of strings or an array of
+	 * objects with path and label fields.  If labels are
+	 * provided, the objects from the analysis for that path
+	 * are tagged with a label property
+	 * @param inPathResolver: optional parameter similar to enyo.path
+	 * needed only if enyo, onyx, ... to analyze are not the one used
+	 * by the current application (e.g: Ares case).
+	 * @protected
+	 */
+	analyze: function(inPaths, inPathResolver) {
+		this.walk(inPaths, inPathResolver);
 	},
-	// inPaths is either an array of strings or an array of
-	// objects with path and label fields.  If labels are
-	// provided, the objects from the analysis for that path
-	// are tagged with a label property
-	walk: function(inPaths) {
+	/**
+	 * Walk over the inPaths items and analyze them
+	 * @param inPaths: is either an array of strings or an array of
+	 * objects with path and label fields.  If labels are
+	 * provided, the objects from the analysis for that path
+	 * are tagged with a label property
+	 * @param inPathResolver: optional parameter similar to enyo.path
+	 * needed only if enyo, onyx, ... to analyze are not the one used
+	 * by the current application (e.g: Ares case).
+	 * @protected
+	 */
+	walk: function(inPaths, inPathResolver) {
 		var modules = [];
 		var currentLabel;
 		var next = function(inSender, inData) {
 			if (inData) {
+				this.debug && enyo.log("Analyzer.walk.next() - inData: ", inData);
 				for (var i = 0; i < inData.modules.length; ++i) {
 					inData.modules[i].label = currentLabel;
 				}
@@ -27,20 +48,23 @@ enyo.kind({
 			}
 			var path = inPaths.shift(), label = '';
 			if (path) {
+				this.debug && enyo.log("Analyzer.walk.next() - path: " + path);
 				if (!enyo.isString(path)) {
 					currentLabel = path.label;
 					path = path.path;
 				}
-				new Walker().walk(path).response(this, next);
+				new Walker().walk(path, inPathResolver).response(this, next);
 			} else {
 				this.walkFinished(modules);
 			}
 		};
 		next.call(this);
 	},
+	//* @protected
 	walkFinished: function(inModules) {
 		this.read(inModules);
 	},
+	//* @protected
 	read: function(inModules) {
 		new Reader()
 			.go({modules: inModules})
@@ -49,6 +73,7 @@ enyo.kind({
 			})
 		;
 	},
+	//* @protected
 	indexModules: function(inModules) {
 		this.index.addModules(inModules);
 		this.doIndexReady();
