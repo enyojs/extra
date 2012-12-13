@@ -8,5 +8,6 @@ enyo.depends(
 	"Parser.js",
 	"Documentor.js",
 	"Indexer.js",
-	"Analyzer.js"
+	"Analyzer.js",
+	"KindHelper.js"
 );
