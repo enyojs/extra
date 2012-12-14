@@ -65,7 +65,7 @@ enyo.kind({
 	},
 	indexObjects: function(inModule) {
 		enyo.forEach(inModule.objects, function(o) {
-			o.module = inModule;
+			//o.module = inModule;  // this isn't needed as far as I can tell and causes recursive problems
 			this.indexObject(o);
 		}, this);
 	},
@@ -80,13 +80,14 @@ enyo.kind({
 	indexProperties: function(inObject) {
 		var p$ = inObject.properties || (inObject.value && inObject.value[0] && inObject.value[0].properties);
 		enyo.forEach(p$, function(p) {
-			p.object = inObject;
-			p.topic = p.object.name ? p.object.name + "::" + p.name : p.name;
-			/*
+			//p.object = inObject;    also causes recursive problems
+			//rearranged code below works though I'm not sure if p.topic gets passed on - please check
 			if (p.value && p.value[0] && p.value[0].properties) {
 				this.indexProperties(p.value[0].properties);
 			}
-			*/
+			else {
+			p.topic = p.name ? inObject.name + "::" + p.name : p.name;
+			}
 		}, this);
 	},
 	indexKind: function(o) {
