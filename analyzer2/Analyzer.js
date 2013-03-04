@@ -37,6 +37,7 @@ enyo.kind({
 	 */
 	walk: function(inPaths, inPathResolver) {
 		var modules = [];
+		var designs = [];
 		var currentLabel;
 		var next = function(inSender, inData) {
 			if (inData) {
@@ -45,6 +46,7 @@ enyo.kind({
 					inData.modules[i].label = currentLabel;
 				}
 				modules = modules.concat(inData.modules);
+				designs = designs.concat(inData.designs);
 			}
 			var path = inPaths.shift(), label = '';
 			if (path) {
@@ -55,27 +57,32 @@ enyo.kind({
 				}
 				new Walker().walk(path, inPathResolver).response(this, next);
 			} else {
-				this.walkFinished(modules);
+				this.walkFinished(modules, designs);
 			}
 		};
 		next.call(this);
 	},
 	//* @protected
-	walkFinished: function(inModules) {
-		this.read(inModules);
+	walkFinished: function(inModules, inDesigns) {
+		this.read(inModules, inDesigns);
 	},
 	//* @protected
-	read: function(inModules) {
+	read: function(inModules, inDesigns) {
 		new Reader()
-			.go({modules: inModules})
+			.go({modules: inModules, designs: inDesigns})
 			.response(this, function(inSender, inData) {
 				this.indexModules(inData.modules);
+				this.indexDesigns(inData.designs);
+				this.doIndexReady();
 			})
 		;
 	},
 	//* @protected
 	indexModules: function(inModules) {
 		this.index.addModules(inModules);
-		this.doIndexReady();
+	},
+	//* @protected
+	indexDesigns: function(inDesigns) {
+		this.index.addDesigns(inDesigns);
 	}
 });
