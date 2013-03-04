@@ -50,7 +50,8 @@ enyo.kind({
 	walkFinish: function() {
 		// we've read all the manifests and constructed our list of modules
 		this.modules = this.loader.modules;
-		this.async.respond({modules: this.modules});
-		this.doFinish({modules: this.modules});
+		this.designs = this.loader.designs;
+		this.async.respond({modules: this.modules, designs: this.designs});
+		this.doFinish({modules: this.modules, designs: this.designs});
 	}
 });
