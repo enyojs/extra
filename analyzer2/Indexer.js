@@ -212,6 +212,73 @@ enyo.kind({
 		}
 		return list;
 	},
+	/**
+	 * Adds data from an array of "design" objects to the indexer, which were previously
+	 * loaded by the Reader into each design object's `code` property.  Design objects may
+	 * specify palette or property meta-data.
+	 * @param  inDesigns	Array of design objects with unparsed code string
+	 * @protected
+	 */
+	addDesigns: function(inDesigns) {
+		enyo.forEach(inDesigns, this.addDesign, this);
+		enyo.forEach(this.palette, this.indexPalette, this);
+		enyo.forEach(this.propertyMetaData, this.indexPropertyMetaData, this);
+	},
+	/**
+	 * Adds a given "design" object to the indexer.
+	 * @param  inDesigns	A design object with unparsed code string
+	 * @protected
+	 */
+	addDesign: function(inDesign) {
+		try {
+			var design = enyo.json.parse(inDesign.code);
+			enyo.forEach(["palette", "propertyMetaData"], function(type) {
+				if (design[type]) {
+					var src = design[type];
+					var dest = this[type] || [];
+					this[type] = dest.concat(src);
+				}
+			}, this);
+		} catch (err) {
+			enyo.warn("Error parsing designer meta-data (" + inDesign.path + "): " + err);
+		}
+	},
+	/**
+	 * Loops over all the palette entries in a given category and marks kinds in the indexer
+	 * with a flag indicating it has a palette entry (useful for generating a catch-all palette
+	 * later).  Also fills in minimum palette information based on defaults if it is missing.
+	 * @param  inCategory	A palette category (containing `items` array of palette entries)
+	 * @protected
+	 */
+	indexPalette: function(inCategory) {
+		enyo.forEach(inCategory.items, function(item) {
+			var obj = this.findByName(item.kind);
+			if (obj) {
+				obj.hasPalette = true;
+				// Fill in defaults for missing data
+				item.name = item.name || obj.name;
+				item.config = item.config || { kind:obj.name };
+				item.inline = item.inline || { kind:obj.name };
+				item.description = item.description || obj.comment;
+			} else {
+				enyo.warn("Designer meta-data specifed palette entry for '" + (item.kind || item.name) + "' but no kind by that name found.");
+			}
+		}, this);
+	},
+	/**
+	 * Assigns a property meta-data item for a kind to its propertyMetaData entry
+	 * @protected
+	 */
+	indexPropertyMetaData: function(inItem) {
+		if (inItem.type == "kind"){
+			var obj = this.findByName(inItem.name);
+			if (obj) {
+				obj.propertyMetaData = inItem;
+			} else {
+				enyo.warn("Designer meta-data specifed property info for '" + inItem.name + "' but no kind by that name found.");
+			}
+		}
+	},
 	statics: {
 		nameCompare: function(inA, inB) {
 			var na = inA.name.toLowerCase(),

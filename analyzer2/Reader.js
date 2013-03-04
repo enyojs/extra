@@ -3,34 +3,35 @@ enyo.kind({
 	kind: enyo.Async,
 	go: function(inData) {
 		this.modules = inData.modules;
-		this.moduleIndex = 0;
-		enyo.asyncMethod(this, "nextModule");
+		this.designs = inData.designs;
+		this.files = inData.modules.concat(inData.designs);
+		enyo.asyncMethod(this, "nextFile");
 		return this;
 	},
-	nextModule: function() {
-		var m = this.modules[this.moduleIndex++];
-		if (m) {
-			this.loadModule(m);
+	nextFile: function() {
+		var f = this.files.shift();
+		if (f) {
+			this.loadFile(f);
 		} else {
-			this.modulesFinished();
+			this.filesFinished();
 		}
 	},
-	loadModule: function(inModule) {
+	loadFile: function(inFile) {
 		enyo.xhr.request({
-			url: inModule.path,
-			callback: enyo.bind(this, "moduleLoaded", inModule)
+			url: inFile.path,
+			callback: enyo.bind(this, "fileLoaded", inFile)
 		});
 	},
-	moduleLoaded: function(inModule, inCode) {
-		this.addModule(inModule, inCode);
-		this.nextModule();
+	fileLoaded: function(inFile, inCode) {
+		this.addFile(inFile, inCode);
+		this.nextFile();
 	},
-	addModule: function(inModule, inCode) {
+	addFile: function(inFile, inCode) {
 		if (inCode && inCode.length) {
-			inModule.code = inCode;
+			inFile.code = inCode;
 		}
 	},
-	modulesFinished: function() {
-		this.respond({modules: this.modules});
+	filesFinished: function() {
+		this.respond({modules: this.modules, designs: this.designs});
 	}
 });
