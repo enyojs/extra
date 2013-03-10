@@ -4,6 +4,8 @@ enyo.kind({
 	group: "public",
 	constructor: function() {
 		this.objects = [];
+		this.palette = [];
+		this.propertyMetaData = [];
 	},
 	debug: false,
 	findByName: function(inName) {
@@ -20,6 +22,21 @@ enyo.kind({
 		var values = enyo.filter(this.objects, inFilterFn, inContext);
 		return enyo.map(values, inMapFn, inContext);
 	},
+	// Normalizes _inPath_ by removing any _._ or _.._'s from the path
+	normalizePath: function(inPath) {
+		var parts = inPath.split("/");
+		var newpath = [];
+		enyo.forEach(parts, function(part) {
+			if (part == ".") {
+				// Do nothing
+			} else if (part == "..") {
+				newpath.pop();
+			} else {
+				newpath.push(part);
+			}
+		}, this);
+		return newpath.join("/");
+	},
 	addModules: function(inModules) {
 		enyo.forEach(inModules, this.addModule, this);
 		// sort (?!)
@@ -33,6 +50,7 @@ enyo.kind({
 		// indexing and merging have to be separated so we can index 'in-progress' modules
 		// without adding them to the database
 		this.debug && enyo.log("Indexer.addModule(): + " + inModule.path);
+		inModule.path = this.normalizePath(inModule.path);
 		this.indexModule(inModule);
 		this.mergeModule(inModule);
 	},
@@ -56,12 +74,46 @@ enyo.kind({
 	indexModule: function(inModule) {
 		// this object is type: "module"
 		inModule.type = "module";
+		inModule.module = inModule;
 		// name this module by incorporating the path so its unique
 		inModule.name = inModule.path? inModule.path.replace("lib/", ""): inModule.label + "/" + inModule.rawPath;
 		// parse module objects
 		inModule.objects = new Documentor(new Parser(new Lexer(inModule.code)));
 		// index module objects
 		this.indexObjects(inModule);
+	},
+	/**
+	 * Removes all indexer data associated with the specified javascript module
+	 * @param  inModule		An object containing at least a path to the file
+	 * @public
+	 */
+	removeModule: function(inModule) {
+		this.removeModuleByPath(inModule.path);
+	},
+	/**
+	 * Removes all indexer data associated with the specified javascript module
+	 * @param  inPath	The path to the file
+	 * @public
+	 */
+	removeModuleByPath: function(inPath) {
+		inPath = this.normalizePath(inPath);
+		// Remove all objects associated with this module
+		var len = this.objects.length;
+		while (len--) {
+			if (this.objects[len].module.path == inPath) {
+				this.objects.splice(len, 1);
+			}
+		}
+	},
+	/**
+	 * Removes all indexer data associated with the specified javascript module, and 
+	 * re-indexes it.
+	 * @param  inModule		An object containing the path and code of the file
+	 * @public
+	 */
+	reIndexModule: function(inModule) {
+		this.removeModule(inModule);
+		this.addModule(inModule);
 	},
 	indexObjects: function(inModule) {
 		enyo.forEach(inModule.objects, function(o) {
@@ -82,6 +134,7 @@ enyo.kind({
 		enyo.forEach(p$, function(p) {
 			p.object = inObject;
 			p.topic = p.object.name ? p.object.name + "::" + p.name : p.name;
+			p.module = inObject.module;
 			/*
 			if (p.value && p.value[0] && p.value[0].properties) {
 				this.indexProperties(p.value[0].properties);
@@ -217,7 +270,7 @@ enyo.kind({
 	 * loaded by the Reader into each design object's `code` property.  Design objects may
 	 * specify palette or property meta-data.
 	 * @param  inDesigns	Array of design objects with unparsed code string
-	 * @protected
+	 * @public
 	 */
 	addDesigns: function(inDesigns) {
 		enyo.forEach(inDesigns, this.addDesign, this);
@@ -227,21 +280,91 @@ enyo.kind({
 	/**
 	 * Adds a given "design" object to the indexer.
 	 * @param  inDesigns	A design object with unparsed code string
-	 * @protected
+	 * @public
 	 */
 	addDesign: function(inDesign) {
+		inDesign.path = this.normalizePath(inDesign.path);
 		try {
 			var design = enyo.json.parse(inDesign.code);
 			enyo.forEach(["palette", "propertyMetaData"], function(type) {
 				if (design[type]) {
 					var src = design[type];
 					var dest = this[type] || [];
+					enyo.forEach(src, function(item) {
+						item.design = inDesign;
+					}, this);
 					this[type] = dest.concat(src);
 				}
 			}, this);
 		} catch (err) {
 			enyo.warn("Error parsing designer meta-data (" + inDesign.path + "): " + err);
 		}
+	},
+	/**
+	 * Removes all indexer data associated with the specified design file
+	 * @param  inDesign		An object containing at least a path to the design file
+	 * @public
+	 */
+	removeDesign: function(inDesign) {
+		this.removeDesignByPath(inDesign.path);
+	},
+	/**
+	 * Removes all indexer data associated with the specified design file
+	 * @param  inPath	The path to the design file
+	 * @public
+	 */
+	removeDesignByPath: function(inPath) {
+		inPath = this.normalizePath(inPath);
+		this.removePalettesByPath(inPath);
+		this.removePropertyMetaDataByPath(inPath);
+	},
+	/**
+	 * Removes palette info associated with the specified design file
+	 * @param  inPath	The path to the design file
+	 * @protected
+	 */
+	removePalettesByPath: function(inPath) {
+		var len = this.palette.length;
+		while (len--) {
+			var cat = this.palette[len];
+			if (cat.design.path == inPath) {
+				enyo.forEach(cat.items, function(item) {
+					var obj = this.findByName(item.kind);
+					if (obj) {
+						obj.hasPalette = false;
+					}
+				}, this);
+				this.palette.splice(len, 1);
+			}
+		}
+	},
+	/**
+	 * Removes property meta-data associated with the specified design file
+	 * @param  inPath	The path to the design file
+	 * @protected
+	 */
+	removePropertyMetaDataByPath: function(inPath) {
+		var len = this.propertyMetaData.length;
+		while (len--) {
+			var item = this.propertyMetaData[len];
+			if (item.design.path == inPath) {
+				var obj = this.findByName(item.kind);
+				if (obj) {
+					obj.propertyMetaData = false;
+				}
+				this.propertyMetaData.splice(len, 1);
+			}
+		}
+	},
+	/**
+	 * Removes all indexer data associated with the specified design file, and 
+	 * re-indexes it.
+	 * @param  inDesign		An object containing the path and code of the design file
+	 * @protected
+	 */
+	reIndexDesign: function(inDesign) {
+		this.removeDesign(inDesign);
+		this.addDesign(inDesign);
 	},
 	/**
 	 * Loops over all the palette entries in a given category and marks kinds in the indexer
