@@ -23,7 +23,7 @@ enyo.kind({
 	loadModule: function(inModule) {
 		enyo.xhr.request({
 			url: inModule.path,
-			callback: enyo.bind(this, "moduleLoaded", inModule)
+			callback: this.bindSafely("moduleLoaded", inModule)
 		});
 	},
 	moduleLoaded: function(inModule, inCode) {
@@ -33,7 +33,7 @@ enyo.kind({
 	addModule: function(inModule, inCode) {
 		if (inCode && inCode.length) {
 			var module = new enyo.Documentor(inCode).results;
-			this.modules[inModule.path] = module; 
+			this.modules[inModule.path] = module;
 			enyo.mixin(module, inModule);
 		}
 	},

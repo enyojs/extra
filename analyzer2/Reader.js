@@ -19,7 +19,7 @@ enyo.kind({
 	loadFile: function(inFile) {
 		enyo.xhr.request({
 			url: inFile.path,
-			callback: enyo.bind(this, "fileLoaded", inFile)
+			callback: this.bindSafely("fileLoaded", inFile)
 		});
 	},
 	fileLoaded: function(inFile, inCode) {
