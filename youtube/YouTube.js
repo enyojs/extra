@@ -45,8 +45,8 @@ enyo.kind({
 				width: '100%',
 				videoId: this.videoId,
 				events: {
-					onReady: enyo.bind(this, "playerReady"),
-					onStateChange: enyo.bind(this, "playerStateChange")
+					onReady: this.bindSafely("playerReady"),
+					onStateChange: this.bindSafely("playerStateChange")
 				}
 			});
 			// positioning hack
