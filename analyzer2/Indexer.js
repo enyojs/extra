@@ -200,20 +200,22 @@ enyo.kind({
 		return all;
 	},
 	mergeInheritedProperties: function(inProperties, inMap, inAll) {
-		for (var j=0, p; p=inProperties[j]; j++) {
-			// look for overridden property
-			var old = inMap.hasOwnProperty(p.name) && inMap[p.name];
-			if (old) {
-				// note the override, reference the previous instance
-				p.overrides = old;
-				// update array (only store latest property)
-				inAll[enyo.indexOf(old, inAll)] = p;
-			} else {
-				// new property
-				inAll.push(p);
+		if (inProperties) {
+			for (var j=0, p; p=inProperties[j]; j++) {
+				// look for overridden property
+				var old = inMap.hasOwnProperty(p.name) && inMap[p.name];
+				if (old) {
+					// note the override, reference the previous instance
+					p.overrides = old;
+					// update array (only store latest property)
+					inAll[enyo.indexOf(old, inAll)] = p;
+				} else {
+					// new property
+					inAll.push(p);
+				}
+				// update temporary property map
+				inMap[p.name] = p;
 			}
-			// update temporary property map
-			inMap[p.name] = p;
 		}
 	},
 	listComponents: function(o) {
