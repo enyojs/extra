@@ -1,26 +1,30 @@
 enyo.kind({
-	name: "Documentor",
-	kind: "AnalyzerDebug",
+	name: "analyzer.Documentor",
+	kind: "analyzer.AnalyzerDebug",
 	group: "public",
 	constructor: function(inTokens) {
 		this.comment = [];
 		// Debug mode is off by default. Could be dynamically turn on by calling AnalyzerDebug._debugEnabled = true;
-		this.debug = AnalyzerDebug._debugEnabled;
+		this.debug = analyzer.AnalyzerDebug._debugEnabled;
 		return this.parse(inTokens);
 	},
 	parse: function(inTokens) {
-		var it = new Iterator(inTokens);
+		var it = new analyzer.Iterator(inTokens);
 		return this.walk(it);
 	},
 	walk: function(it, inState) {
 		var objects = [], node, obj;
-		if (this.debug) this.logMethodEntry(it, "inState " + inState + " >>" + JSON.stringify(it.value) + "<<");		
+		if (this.debug) {
+			this.logMethodEntry(it, "inState " + inState + " >>" + JSON.stringify(it.value) + "<<");
+		}
 		while (it.next()) {
 			node = it.value;
-			if (this.debug) this.logProcessing(it, node);
+			if (this.debug) {
+				this.logProcessing(it, node);
+			}
 			if (node.kind == "comment") {
 				this.cook_comment(node.token);
-			} 
+			}
 			else if (node.token == "enyo.kind" && it.future.kind == "association") {
 				obj = this.cook_kind(it);
 			}
@@ -34,7 +38,7 @@ enyo.kind({
 					var fn = node.children[0];
 					if (fn.children && fn.children.length == 2) {
 						var body = fn.children[1];
-						var objs = this.walk(new Iterator(body.children));
+						var objs = this.walk(new analyzer.Iterator(body.children));
 						// add whatever was in the closure to the main object list
 						objects = objects.concat(objs);
 					}
@@ -47,14 +51,18 @@ enyo.kind({
 				obj = null;
 			}
 		}
-		if (this.debug) this.logMethodExit(it);
+		if (this.debug) {
+			this.logMethodExit(it);
+		}
 		return objects;
 	},
 	cook_kind: function(it) {
-		if (this.debug) this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
+		if (this.debug) {
+			this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
+		}
 		// Get inProps[name].value[0].token
 		var val = function(inProps, inName) {
-			var i = Documentor.indexByName(inProps, inName), p;
+			var i = analyzer.Documentor.indexByName(inProps, inName), p;
 			if (i >= 0) {
 				p = inProps[i];
 				inProps.splice(p, 1);
@@ -64,7 +72,7 @@ enyo.kind({
 		/*
 		// Set inProps[name].properties to inProps[name].value[0].properties
 		var flatten = function(inProps, inName) {
-			var p = Documentor.findByName(inProps, inName);
+			var p = analyzer.Documentor.findByName(inProps, inName);
 			var v = p && p.value && p.value.length && p.value[0];
 			if (v) {
 				p.properties = p.value[0].properties;
@@ -82,8 +90,8 @@ enyo.kind({
 			// these are the properties
 			obj.properties = this.cook_block(args[0].children);
 			// process special properties
-			obj.name = Documentor.stripQuotes(val(obj.properties, "name") || "");
-			obj.superkind = Documentor.stripQuotes(val(obj.properties, "kind") || "enyo.Control");
+			obj.name = analyzer.Documentor.stripQuotes(val(obj.properties, "name") || "");
+			obj.superkind = analyzer.Documentor.stripQuotes(val(obj.properties, "kind") || "enyo.Control");
 			if (obj.superkind == "null") {
 				obj.superkind = null;
 			}
@@ -92,25 +100,33 @@ enyo.kind({
 			// remove excess value nodes
 			//flatten(obj.properties, "published");
 		}
-		if (this.debug) this.logMethodExit(it);
+		if (this.debug) {
+			this.logMethodExit(it);
+		}
 		return obj;
 	},
 	cook_block: function(inNodes) {
-		if (this.debug) this.logMethodEntry();
+		if (this.debug) {
+			this.logMethodEntry();
+		}
 		var props = [];
-		for (var i=0, n; n=inNodes[i]; i++) {
-			if (this.debug) this.logProcessing(null, n);
+		for (var i=0, n; (n=inNodes[i]); i++) {
+			if (this.debug) {
+				this.logProcessing(null, n);
+			}
 			if (n.kind == "comment") {
 				this.cook_comment(n.token);
 			}
 			else if (n.kind == "assignment") {
 				var prop = this.make("property", n);
 				if (n.children) {
-					prop.value = [this.walkValue(new Iterator(n.children))];
+					prop.value = [this.walkValue(new analyzer.Iterator(n.children))];
 					if (n.commaTerminated === undefined) {
 						prop.commaTerminated = n.children[0].commaTerminated || false;
 						if (n.children[0].commaTerminated === undefined) {
-							if (this.debug) this.logMsg("NO COMMA TERMINATED INFO");
+							if (this.debug) {
+								this.logMsg("NO COMMA TERMINATED INFO");
+							}
 						}
 					} else {
 						prop.commaTerminated = n.commaTerminated;
@@ -119,31 +135,43 @@ enyo.kind({
 				props.push(prop);
 			}
 		}
-		if (this.debug) this.logMethodExit();
+		if (this.debug) {
+			this.logMethodExit();
+		}
 		return props;
 	},
 	walkValue: function(it, inState) {
-		if (this.debug) this.logMethodEntry(it, "inState: " + inState + " >>" + JSON.stringify(it.value) + "<<");
+		if (this.debug) {
+			this.logMethodEntry(it, "inState: " + inState + " >>" + JSON.stringify(it.value) + "<<");
+		}
 		while (it.next()) {
 			var node = it.value, obj;
-			if (this.debug) this.logProcessing(it, node);
+			if (this.debug) {
+				this.logProcessing(it, node);
+			}
 			if (node.kind == "comment") {
 				this.cook_comment(node.token);
 			}
 			else if (node.kind == "block") {
 				obj = this.make("block", node);
 				obj.properties = this.cook_block(node.children);
-				if (this.debug) this.logMethodExit(it, "inState: " + inState + " >>" + JSON.stringify(it.value) + "<<");
+				if (this.debug) {
+					this.logMethodExit(it, "inState: " + inState + " >>" + JSON.stringify(it.value) + "<<");
+				}
 				return obj;
 			}
 			else if (node.kind == "array") {
 				obj = this.cook_array(it);
-				if (this.debug) this.logMethodExit(it);
+				if (this.debug) {
+					this.logMethodExit(it);
+				}
 				return obj;
 			}
 			else if (node.kind == "function") {
 				obj = this.cook_function(it);
-				if (this.debug) this.logMethodExit(it, "inState: " + inState + " >>" + JSON.stringify(it.value) + "<<");
+				if (this.debug) {
+					this.logMethodExit(it, "inState: " + inState + " >>" + JSON.stringify(it.value) + "<<");
+				}
 				return obj;
 			}
 			else {
@@ -153,31 +181,41 @@ enyo.kind({
 					t += it.value.token;
 				}
 				obj.token = t;
-				if (this.debug) this.logMethodExit(it);
+				if (this.debug) {
+					this.logMethodExit(it);
+				}
 				return obj;
 			}
 		}
-		if (this.debug) this.logMethodExit(it);
+		if (this.debug) {
+			this.logMethodExit(it);
+		}
 	},
 	cook_function: function(it) {
-		if (this.debug) this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
+		if (this.debug) {
+			this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
+		}
 		var node = it.value;
 		var obj = this.make("expression", node);
 		obj.commaTerminated = node.commaTerminated;
 		obj['arguments'] = enyo.map(node.children[0].children, function(n) { return n.token; });
-		if (this.debug) this.logMethodExit(it);
+		if (this.debug) {
+			this.logMethodExit(it);
+		}
 		return obj;
 	},
 	cook_array: function(it) {
-		if (this.debug) this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
+		if (this.debug) {
+			this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
+		}
 		var node = it.value;
 		var obj = this.make("array", node);
 		var nodes = node.children;
 		if (nodes) {
 			var elts = [];
-			for (var i=0, n, v; n=nodes[i]; i++) {
+			for (var i=0, n, v; (n=nodes[i]); i++) {
 				if (n.children) {   // Skip nodes without children such as comments
-					v = this.walkValue(new Iterator(n.children));
+					v = this.walkValue(new analyzer.Iterator(n.children));
 					if (v) {
 						elts.push(v);
 					}
@@ -185,20 +223,26 @@ enyo.kind({
 			}
 			obj.properties = elts;
 		}
-		if (this.debug) this.logMethodExit(it);
+		if (this.debug) {
+			this.logMethodExit(it);
+		}
 		return obj;
 	},
 	cook_assignment: function(it) {
-		if (this.debug) this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
+		if (this.debug) {
+			this.logMethodEntry(it, ">>" + JSON.stringify(it.value) + "<<");
+		}
 		var node = it.value;
 		var obj = this.make("global", node);
 		if (node.children) {
 			if (node.children[0] && node.children[0].token == "function") {
 				obj.type = "function";
 			}
-			obj.value = [this.walkValue(new Iterator(node.children))];
+			obj.value = [this.walkValue(new analyzer.Iterator(node.children))];
 		}
-		if (this.debug) this.logMethodExit();
+		if (this.debug) {
+			this.logMethodExit();
+		}
 		return obj;
 	},
 	make: function(inType, inNode) {
@@ -224,16 +268,20 @@ enyo.kind({
 	// * some are pragmas are read and acted on
 	// * other comments are collected and attached to the next emitted node
 	cook_comment: function(inToken) {
-		if (this.debug) this.logMethodEntry();
+		if (this.debug) {
+			this.logMethodEntry();
+		}
 		var m = inToken.match(this.commentRx);
 		if (m) {
-			m = m[1] ? m[1] : m[2]; 
+			m = m[1] ? m[1] : m[2];
 			// separate pragmas from doc comments
 			var p = this.extractPragmas(m);
 			// act on pragmas
 			this.honorPragmas(p);
 		}
-		if (this.debug) this.logMethodExit();
+		if (this.debug) {
+			this.logMethodExit();
+		}
 	},
 	extractPragmas: function(inString) {
 		var pragmaRx = /^[*\s]*@[\S\s]*/g,
@@ -255,7 +303,7 @@ enyo.kind({
 	},
 	honorPragmas: function(inPragmas) {
 		var groups = {'protected': 1, 'public': 1};
-		for (var i=0, p; p=inPragmas[i]; i++) {
+		for (var i=0, p; (p=inPragmas[i]); i++) {
 			if (groups[p]) {
 				//console.log(p);
 				this.group = p;
@@ -268,13 +316,13 @@ enyo.kind({
 		this.comment = [];
 		// Remove leading indent so markdown spacing is intact.
 		// Assumes first non-empty line in comment is block-left.
-		var md = Documentor.removeIndent(comment);
+		var md = analyzer.Documentor.removeIndent(comment);
 		//md = md.replace("<", "&lt;");
 		return md;
 	},
 	statics: {
 		indexByProperty: function(inObjects, inProperty, inValue) {
-			for (var i=0, o; o=inObjects[i]; i++) {
+			for (var i=0, o; (o=inObjects[i]); i++) {
 				if (o[inProperty] == inValue) {
 					return i;
 				}

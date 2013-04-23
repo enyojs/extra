@@ -4,10 +4,10 @@
  * of the analyzer for a specific kind.
  *
  * First, call setDefinition() to pass the data object
- * retrieved thru Indexer.findByName().
+ * retrieved thru analyzer.Indexer.findByName().
  */
 enyo.kind({
-	name: "Analyzer.KindHelper",
+	name: "analyzer.Analyzer.KindHelper",
 	kind: "enyo.Component",
 	published: {
 		definition: null
@@ -30,10 +30,10 @@ enyo.kind({
 		this.checkDefAvail();
 		var events = [];
 
-		obj = this.definition.properties;
-		for (i=0; i<obj.length; i++) {
+		var obj = this.definition.properties;
+		for (var i=0; i<obj.length; i++) {
 			if (obj[i].token === "events") {
-				p = obj[i].value[0].properties;
+				var p = obj[i].value[0].properties;
 				for (var j=0; j < p.length; j++) {
 					var name = p[j].name;
 					events.push(name);
@@ -51,10 +51,10 @@ enyo.kind({
 		this.checkDefAvail();
 		var published = [];
 
-		obj = this.definition.properties;
-		for (i=0; i<obj.length; i++) {
+		var obj = this.definition.properties;
+		for (var i=0; i<obj.length; i++) {
 			if (obj[i].token === "published") {
-				p = obj[i].value[0].properties;
+				var p = obj[i].value[0].properties;
 				for (var j=0; j < p.length; j++) {
 					var name = p[j].name;
 					published.push(name);

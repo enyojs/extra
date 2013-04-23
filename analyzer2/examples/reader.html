@@ -12,9 +12,9 @@
 <body>
 	<script>
 		var path = "$enyo/source";
-		new Walker()
+		new analyzer.Walker()
 			.walk(path)
-			.response(new Reader())
+			.response(new analyzer.Reader())
 			.response(function(inSender, inData) {
 				console.dir(inData.modules);
 				console.log("done reading");

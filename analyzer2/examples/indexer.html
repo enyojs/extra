@@ -93,7 +93,7 @@
 				{name: "code", tag: "code", fit: true, classes: "box", style: "overflow: auto;"}
 			],
 			create: function() {
-				this.indexer = new Indexer();
+				this.indexer = new analyzer.Indexer();
 				this.inherited(arguments);
 				this.walk(["$enyo/source", "$lib/layout", "$lib/onyx/source"]);
 			},
@@ -106,7 +106,7 @@
 					var path = inPaths.shift();
 					if (path) {
 						//this.log(path);
-						new Walker().walk(path).response(this, next);
+						new analyzer.Walker().walk(path).response(this, next);
 					} else {
 						this.read(this.modules);
 					}
@@ -114,7 +114,7 @@
 				next.call(this);
 			},
 			read: function(inModules) {
-				new Reader()
+				new analyzer.Reader()
 					.go({modules: inModules})
 					.response(this, function(inSender, inData) {
 						this.modules = inData.modules;
@@ -136,7 +136,7 @@
 				for (var i=0, o; o=this.indexer.objects[i]; i++) {
 					var name = o.name;
 					var object = o.object && o.object.name;
-					//var caption = "<topic>" + (o.topic || o.name) + "</topic>"; 
+					//var caption = "<topic>" + (o.topic || o.name) + "</topic>";
 					var module = o.module && o.module.name /*|| o.object && o.object.module && o.object.module.name*/;
 					var caption = "<topic>" + o.name + "</topic>" + (object ? ": " + object : "") + (module ? " [" + module + "]" : "");
 					this.createComponent({Xtag: "topic", container: this.$.index, allowHtml: true, content: caption + "<br/>", object: o, ontap: "objectTap"});
@@ -155,7 +155,7 @@
 			},
 			document: function(inModule) {
 				this.$.code.setContent(inModule.code);
-				this.$.docs.setContent(new Presentor().presentObjects(inModule.objects));
+				this.$.docs.setContent(new analyzer.Presentor().presentObjects(inModule.objects));
 			}
 		});
 		new App({fit: true}).write();

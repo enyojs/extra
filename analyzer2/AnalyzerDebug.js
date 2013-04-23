@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "AnalyzerDebug",
+	name: "analyzer.AnalyzerDebug",
 	kind: null,
 	debug: false,
 	_level: 0,
@@ -46,7 +46,7 @@ enyo.kind({
 			return "[" + it.ID + "/" + it.i + "] ";
 		} else {
 			return "";
-		}			
+		}
 	},
 	logMethodEntry: function(it, msg) {
 		msg = msg || "";
@@ -67,6 +67,6 @@ enyo.kind({
 		enyo.log(this.methodName(1) + this.showLevel() + msg + this.getPreviousStackInfo(1));
 	},
     statics: {
-    	_debugEnabled: false
+		_debugEnabled: false
     }
 });

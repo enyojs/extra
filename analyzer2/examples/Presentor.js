@@ -1,9 +1,9 @@
 enyo.kind({
-	name: "Presentor",
+	name: "analyzer.Presentor",
 	kind: null,
 	getByType: function(inObjects, inType) {
 		var result = [];
-		for (var i=0, o; o=inObjects[i]; i++) {
+		for (var i=0, o; (o=inObjects[i]); i++) {
 			if (o.type == inType) {
 				result.push(o);
 			}
@@ -11,9 +11,9 @@ enyo.kind({
 		return result;
 	},
 	document: function(inCode) {
-		var tokens = new Lexer(inCode);
-		var nodes = new Parser(tokens);
-		var objects = new Documentor(nodes);
+		var tokens = new analyzer.Lexer(inCode);
+		var nodes = new analyzer.Parser(tokens);
+		var objects = new analyzer.Documentor(nodes);
 		return this.presentObjects(objects);
 	},
 	presentObjects: function(inObjects) {
@@ -22,7 +22,8 @@ enyo.kind({
 		//
 		w("<h3>Kinds</h3>");
 		var objs = this.getByType(inObjects, "kind");
-		for (var i=0, o; o=objs[i]; i++) {
+		var i, o;
+		for (i=0; (o=objs[i]); i++) {
 			//w("<i>name:</i> ");
 			w("<kind>" + o.name + "</kind><br/>");
 			if (o.comment) {
@@ -31,8 +32,8 @@ enyo.kind({
 			w("<blockquote>" + this.presentKind(o) + "</blockquote>");
 		}
 		w("<h3>Functions</h3>");
-		var objs = this.getByType(inObjects, "function");
-		for (var i=0, o; o=objs[i]; i++) {
+		objs = this.getByType(inObjects, "function");
+		for (i=0; (o=objs[i]); i++) {
 			if (o.comment) {
 				html += "<comment>" + o.comment + "</comment>";
 			}
@@ -42,8 +43,8 @@ enyo.kind({
 			w("<i>name:</i> <label>" + o.name + "</label><br/>");
 		}
 		w("<h3>Variables</h3>");
-		var objs = this.getByType(inObjects, "global");
-		for (var i=0, o; o=objs[i]; i++) {
+		objs = this.getByType(inObjects, "global");
+		for (i=0; (o=objs[i]); i++) {
 			if (o.comment) {
 				html += "<comment>" + o.comment + "</comment>";
 			}
@@ -56,19 +57,19 @@ enyo.kind({
 		return html;
 	},
 	presentKind: function(inKind) {
-		console.log("kind: ", inKind);
+		window.console.log("kind: ", inKind);
 		var html = '';
 		if (inKind.superkinds) {
 			html += "<h3>Extends</h3>";
 			enyo.forEach(inKind.superkinds, function(e) {
 				html += "<superkind>" + e + "</superkind>";
 			});
-		};
-		html += 
+		}
+		html +=
 			"<h3>Properties</h3>"
 			+ this.presentBlock(inKind)
 			;
-		html += 
+		html +=
 			"<h3>All Properties</h3>"
 			+ this.presentProperties(inKind.allProperties)
 			;
@@ -81,14 +82,14 @@ enyo.kind({
 		//console.log("array: ", inObject);
 		var html = '';
 		var props = inObject.properties;
-		for (var i=0, p; p=props[i]; i++) {
+		for (var i=0, p; (p=props[i]); i++) {
 			html += '<i>' + i + '</i>: ' + this.presentExpression(p);
 		}
 		return html;
 	},
 	presentProperties: function(inProperties) {
 		var html = '';
-		for (var i=0, p; p=inProperties[i]; i++) {
+		for (var i=0, p; (p=inProperties[i]); i++) {
 			html += this.presentProperty(p);
 		}
 		return html;
@@ -127,7 +128,7 @@ enyo.kind({
 		//console.log("expr: ", inObject);
 		var o = inObject;
 		if (o.comment) {
-			html += "<comment>" + o.comment + "</comment>";
+			return "<comment>" + o.comment + "</comment>";
 		}
 		if (o.type == "block") {
 			return "<blockquote>" + this.presentBlock(o) + "</blockquote>";

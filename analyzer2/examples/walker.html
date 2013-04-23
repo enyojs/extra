@@ -11,7 +11,7 @@
 <body>
 	<script>
 		var path = "$enyo/source";
-		new Walker()
+		new analyzer.Walker()
 			.walk(path)
 			.response(function(inSender, inData) {
 				console.dir(inData.modules);
