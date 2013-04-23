@@ -2,7 +2,13 @@
 // implement loader 'machine':
 // the machine implements the interface required by 'loader'
 //
-runtimeMachine = {
+
+// create analyzer namespace if it doesn't already exist
+if (window.analyzer === undefined) {
+	window.analyzer = {};
+}
+
+analyzer.runtimeMachine = {
 	_head: function(inType, inAttrs, inText) {
 		this._inflight = true;
 		var elt = document.createElement(inType);

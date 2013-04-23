@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "Walker",
+	name: "analyzer.Walker",
 	kind: enyo.Component,
 	published: {
 		verbose: false
@@ -9,9 +9,11 @@ enyo.kind({
 		onFinish: ""
 	},
 	walk: function(inPath, inPathResolver) {
-		this.verbose && this.log("inPath: " + inPath + " resolver: ", inPathResolver);
+		if (this.verbose) {
+			this.log("inPath: " + inPath + " resolver: ", inPathResolver);
+		}
 		// make a new loader
-		this.loader = new enyo.loaderFactory(runtimeMachine, inPathResolver);
+		this.loader = new enyo.loaderFactory(analyzer.runtimeMachine, inPathResolver);
 		// stub out script loader, we only need manifests to walk dependencies
 		this.loader.loadScript = function(){};
 		// stub out stylesheet loader
@@ -34,15 +36,21 @@ enyo.kind({
 		enyo.loader = this.loader;
 
 		// walk application dependencies
+		var path;
 		if (inPathResolver) {
 			path = inPathResolver.rewrite(inPath);
-			this.verbose && path !== inPath && this.log("inPathResolver: " + inPath + " ==> " + path);
+			if (this.verbose && path !== inPath) {
+				this.log("inPathResolver: " + inPath + " ==> " + path);
+			}
 		} else {
 			path = enyo.path.rewrite(inPath);
-			this.verbose && path !== inPath && this.log("enyo.path: " + inPath + " ==> " + path);
+			if (this.verbose && path !== inPath) {
+				this.log("enyo.path: " + inPath + " ==> " + path);
+			}
 		}
 		enyo.asyncMethod(this.loader, "load", path);
-		return this.async = new enyo.Async();
+		this.async = new enyo.Async();
+		return this.async;
 	},
 	walkReport: function(inAction, inName) {
 		this.doProgress({action: inAction, name: inName});

@@ -1,6 +1,6 @@
 //* @protected
 enyo.kind({
-	name: "AbstractLexer",
+	name: "analyzer.AbstractLexer",
 	kind: null,
 	constructor: function(inText) {
 		if (inText) {
@@ -58,7 +58,7 @@ enyo.kind({
 	pushToken: function(inKind, inCount, inAllowEmpty) {
 		// move the position (p) by inCount characters (i.e. add inCount characters to token)
 		this.tokenize(inCount);
-		// copy the token between p0 and p 
+		// copy the token between p0 and p
 		var token = this.getToken();
 		// if the token is empty string, immediately return an empty object
 		if (!token && !inAllowEmpty) {
@@ -93,8 +93,8 @@ enyo.kind({
 });
 
 enyo.kind({
-	name: "Lexer",
-	kind: AbstractLexer,
+	name: "analyzer.Lexer",
+	kind: analyzer.AbstractLexer,
 	symbols: "(){}[];,:<>+-=*/&",
 	operators: [ "++", "--", "+=", "-=", "==", "!=", "<=", ">=", "===", "&&", "||", '"', "'"],
 	keywords: [ "function", "new", "return", "if", "else", "while", "do", "break", "continue", "switch", "case", "var" ],
@@ -157,11 +157,12 @@ enyo.kind({
 		}
 	},
 	process: function(inMatchers) {
-		for (var i=0, f; (f=inMatchers[i]); i++)
+		for (var i=0, f; (f=inMatchers[i]); i++) {
 			if (this.m[i+1] && this[f]) {
 				this[f].apply(this);
 				return;
 			}
+		}
 		this.doSymbol();
 	},
 	doWhitespace: function() {
@@ -183,13 +184,13 @@ enyo.kind({
 		var rx = new RegExp("\\" + delim + "|\\\\", "g");
 		while (this.search(rx)) {
 			switch (this.d) {
-				case '\\':
-					this.doEscape();
-					break;
-				default:
-					this.pushToken('literal', 0, true).delimiter = delim;
-					this.tossToken(1);
-					return;
+			case '\\':
+				this.doEscape();
+				break;
+			default:
+				this.pushToken('literal', 0, true).delimiter = delim;
+				this.tossToken(1);
+				return;
 			}
 		}
 	},

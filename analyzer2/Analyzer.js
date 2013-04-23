@@ -1,12 +1,12 @@
 enyo.kind({
-	name: "Analyzer",
+	name: "analyzer.Analyzer",
 	kind: "Component",
 	debug: false,
 	events: {
 		onIndexReady: ""
 	},
 	create: function() {
-		this.index = new Indexer();
+		this.index = new analyzer.Indexer();
 		this.inherited(arguments);
 	},
 	/**
@@ -41,21 +41,25 @@ enyo.kind({
 		var currentLabel;
 		var next = function(inSender, inData) {
 			if (inData) {
-				this.debug && enyo.log("Analyzer.walk.next() - inData: ", inData);
+				if (this.debug) {
+					enyo.log("analyzer.Analyzer.walk.next() - inData: ", inData);
+				}
 				for (var i = 0; i < inData.modules.length; ++i) {
 					inData.modules[i].label = currentLabel;
 				}
 				modules = modules.concat(inData.modules);
 				designs = designs.concat(inData.designs);
 			}
-			var path = inPaths.shift(), label = '';
+			var path = inPaths.shift();
 			if (path) {
-				this.debug && enyo.log("Analyzer.walk.next() - path: " + path);
+				if (this.debug) {
+					enyo.log("analyzer.Analyzer.walk.next() - path: " + path);
+				}
 				if (!enyo.isString(path)) {
 					currentLabel = path.label;
 					path = path.path;
 				}
-				new Walker().walk(path, inPathResolver).response(this, next);
+				new analyzer.Walker().walk(path, inPathResolver).response(this, next);
 			} else {
 				this.walkFinished(modules, designs);
 			}
@@ -68,7 +72,7 @@ enyo.kind({
 	},
 	//* @protected
 	read: function(inModules, inDesigns) {
-		new Reader()
+		new analyzer.Reader()
 			.go({modules: inModules, designs: inDesigns})
 			.response(this, function(inSender, inData) {
 				this.indexModules(inData.modules);

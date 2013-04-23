@@ -81,7 +81,7 @@
 					var path = inPaths.shift();
 					if (path) {
 						//this.log(path);
-						new Walker().walk(path).response(this, next);
+						new analyzer.Walker().walk(path).response(this, next);
 					} else {
 						this.read(this.modules);
 					}
@@ -89,7 +89,7 @@
 				next.call(this);
 			},
 			read: function(inModules) {
-				new Reader()
+				new analyzer.Reader()
 					.go({modules: inModules})
 					.response(this, function(inSender, inData) {
 						this.modules = inData.modules;
@@ -107,7 +107,7 @@
 			},
 			document: function(inCode) {
 				this.$.body.setContent(inCode);
-				this.$.docs.setContent(new Presentor().document(inCode));
+				this.$.docs.setContent(new analyzer.Presentor().document(inCode));
 			}
 		});
 		new App({fit: true}).write();
