@@ -1,5 +1,5 @@
 enyo.kind({
-	name: "Reader",
+	name: "analyzer.Reader",
 	kind: enyo.Async,
 	go: function(inData) {
 		this.modules = inData.modules;

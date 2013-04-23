@@ -46,7 +46,7 @@
 		}
 		//
 		dumpNodes = function(inNodes) {
-			var it = new Iterator(inNodes);
+			var it = new analyzer.Iterator(inNodes);
 			while (it.next()) {
 				//console.log(it.value);
 				w("<i>" + it.value.kind + "</i>: ");
@@ -61,7 +61,7 @@
 		}
 		//
 		dumpObjects = function(inObjects) {
-			var it = new Iterator(inObjects);
+			var it = new analyzer.Iterator(inObjects);
 			while (it.next()) {
 				var o = it.value;
 				w("<i>" + o.type + "</i>: ");
@@ -117,7 +117,7 @@
 		//
 		var s = document.getElementById("test");
 		//
-		var tokens = new Lexer(s.text);
+		var tokens = new analyzer.Lexer(s.text);
 		w('Lexer: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
 		console.dir(tokens);
 		dumpTokens(tokens);
@@ -125,7 +125,7 @@
 		//
 		w('<br/>');
 		//
-		var nodes = new Parser(tokens);
+		var nodes = new analyzer.Parser(tokens);
 		console.dir(nodes);
 		w('Parser: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
 		dumpNodes(nodes);
@@ -133,7 +133,7 @@
 		//
 		w('<br/>');
 		//
-		var objects = new Documentor(nodes);
+		var objects = new analyzer.Documentor(nodes);
 		console.dir(objects);
 		w('Documentor: <div style="width: 500px; height: 400px; overflow: auto; border: 1px solid silver; font-size: smaller;">');
 		dumpObjects(objects);
