@@ -5,7 +5,7 @@ enyo.kind({
 	constructor: function() {
 		this.objects = [];
 		this.palette = [];
-		this.propertyMetaData = [];
+		this.inspector = [];
 	},
 	debug: false,
 	findByName: function(inName) {
@@ -279,7 +279,7 @@ enyo.kind({
 	addDesigns: function(inDesigns) {
 		enyo.forEach(inDesigns, this.addDesign, this);
 		enyo.forEach(this.palette, this.indexPalette, this);
-		enyo.forEach(this.propertyMetaData, this.indexPropertyMetaData, this);
+		enyo.forEach(this.inspector, this.indexPropertyMetaData, this);
 	},
 	/**
 	 * Adds a given "design" object to the indexer.
@@ -290,7 +290,7 @@ enyo.kind({
 		inDesign.path = this.normalizePath(inDesign.path);
 		try {
 			var design = enyo.json.parse(inDesign.code);
-			enyo.forEach(["palette", "propertyMetaData"], function(type) {
+			enyo.forEach(["palette", "inspector"], function(type) {
 				if (design[type]) {
 					var src = design[type];
 					var dest = this[type] || [];
@@ -349,15 +349,15 @@ enyo.kind({
 	 * @protected
 	 */
 	removePropertyMetaDataByPath: function(inPath) {
-		var len = this.propertyMetaData.length;
+		var len = this.inspector.length;
 		while (len--) {
-			var item = this.propertyMetaData[len];
+			var item = this.inspector[len];
 			if (item.design.path == inPath) {
 				var obj = this.findByName(item.kind);
 				if (obj) {
-					obj.propertyMetaData = false;
+					obj.inspector = false;
 				}
-				this.propertyMetaData.splice(len, 1);
+				this.inspector.splice(len, 1);
 			}
 		}
 	},
@@ -401,7 +401,7 @@ enyo.kind({
 		if (inItem.type == "kind"){
 			var obj = this.findByName(inItem.name);
 			if (obj) {
-				obj.propertyMetaData = inItem;
+				obj.inspector = inItem;
 			} else {
 				enyo.warn("Designer meta-data specifed property info for '" + inItem.name + "' but no kind by that name found.");
 			}
