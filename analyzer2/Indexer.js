@@ -4,8 +4,7 @@ enyo.kind({
 	group: "public",
 	constructor: function() {
 		this.objects = [];
-		this.palette = [];
-		this.propertyMetaData = [];
+		this.design = {};
 	},
 	debug: false,
 	findByName: function(inName) {
@@ -271,15 +270,12 @@ enyo.kind({
 	},
 	/**
 	 * Adds data from an array of "design" objects to the indexer, which were previously
-	 * loaded by the Reader into each design object's `code` property.  Design objects may
-	 * specify palette or property meta-data.
+	 * loaded by the Reader into each design object's `code` property.  
 	 * @param  inDesigns	Array of design objects with unparsed code string
 	 * @public
 	 */
 	addDesigns: function(inDesigns) {
 		enyo.forEach(inDesigns, this.addDesign, this);
-		enyo.forEach(this.palette, this.indexPalette, this);
-		enyo.forEach(this.propertyMetaData, this.indexPropertyMetaData, this);
 	},
 	/**
 	 * Adds a given "design" object to the indexer.
@@ -290,14 +286,15 @@ enyo.kind({
 		inDesign.path = this.normalizePath(inDesign.path);
 		try {
 			var design = enyo.json.parse(inDesign.code);
-			enyo.forEach(["palette", "propertyMetaData"], function(type) {
+			var keys = enyo.keys(design);
+			enyo.forEach(keys, function(type) {
 				if (design[type]) {
 					var src = design[type];
-					var dest = this[type] || [];
+					var dest = this.design[type] || [];
 					enyo.forEach(src, function(item) {
 						item.design = inDesign;
 					}, this);
-					this[type] = dest.concat(src);
+					this.design[type] = dest.concat(src);
 				}
 			}, this);
 		} catch (err) {
@@ -310,54 +307,27 @@ enyo.kind({
 	 * @public
 	 */
 	removeDesign: function(inDesign) {
-		this.removeDesignByPath(inDesign.path);
+		try {
+			var keys = enyo.keys(this.design);
+			enyo.forEach(keys, function(category) {
+				this.removeDesignByPath(inDesign.path, category);
+			}, this);
+		} catch (err) {
+			enyo.warn("Error removing designer (" + inDesign + "): " + err);
+		}		
 	},
 	/**
 	 * Removes all indexer data associated with the specified design file
 	 * @param  inPath	The path to the design file
 	 * @public
 	 */
-	removeDesignByPath: function(inPath) {
+	removeDesignByPath: function(inPath, category) {
 		inPath = this.normalizePath(inPath);
-		this.removePalettesByPath(inPath);
-		this.removePropertyMetaDataByPath(inPath);
-	},
-	/**
-	 * Removes palette info associated with the specified design file
-	 * @param  inPath	The path to the design file
-	 * @protected
-	 */
-	removePalettesByPath: function(inPath) {
-		var len = this.palette.length;
-		var clearHasPalette = function(item) {
-			var obj = this.findByName(item.kind);
-			if (obj) {
-				obj.hasPalette = false;
-			}
-		};
+		var len = this.design[category].length;
 		while (len--) {
-			var cat = this.palette[len];
+			var cat = this.design[category][len];
 			if (cat.design.path == inPath) {
-				enyo.forEach(cat.items, clearHasPalette, this);
-				this.palette.splice(len, 1);
-			}
-		}
-	},
-	/**
-	 * Removes property meta-data associated with the specified design file
-	 * @param  inPath	The path to the design file
-	 * @protected
-	 */
-	removePropertyMetaDataByPath: function(inPath) {
-		var len = this.propertyMetaData.length;
-		while (len--) {
-			var item = this.propertyMetaData[len];
-			if (item.design.path == inPath) {
-				var obj = this.findByName(item.kind);
-				if (obj) {
-					obj.propertyMetaData = false;
-				}
-				this.propertyMetaData.splice(len, 1);
+				this.design[category].splice(len, 1);
 			}
 		}
 	},
@@ -370,42 +340,6 @@ enyo.kind({
 	reIndexDesign: function(inDesign) {
 		this.removeDesign(inDesign);
 		this.addDesign(inDesign);
-	},
-	/**
-	 * Loops over all the palette entries in a given category and marks kinds in the indexer
-	 * with a flag indicating it has a palette entry (useful for generating a catch-all palette
-	 * later).  Also fills in minimum palette information based on defaults if it is missing.
-	 * @param  inCategory	A palette category (containing `items` array of palette entries)
-	 * @protected
-	 */
-	indexPalette: function(inCategory) {
-		enyo.forEach(inCategory.items, function(item) {
-			var obj = this.findByName(item.kind);
-			if (obj) {
-				obj.hasPalette = true;
-				// Fill in defaults for missing data
-				item.name = item.name || obj.name;
-				item.config = item.config || { kind:obj.name };
-				item.inline = item.inline || { kind:obj.name };
-				item.description = item.description || obj.comment;
-			} else {
-				enyo.warn("Designer meta-data specifed palette entry for '" + (item.kind || item.name) + "' but no kind by that name found.");
-			}
-		}, this);
-	},
-	/**
-	 * Assigns a property meta-data item for a kind to its propertyMetaData entry
-	 * @protected
-	 */
-	indexPropertyMetaData: function(inItem) {
-		if (inItem.type == "kind"){
-			var obj = this.findByName(inItem.name);
-			if (obj) {
-				obj.propertyMetaData = inItem;
-			} else {
-				enyo.warn("Designer meta-data specifed property info for '" + inItem.name + "' but no kind by that name found.");
-			}
-		}
 	},
 	statics: {
 		nameCompare: function(inA, inB) {
