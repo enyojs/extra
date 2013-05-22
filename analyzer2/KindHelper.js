@@ -62,5 +62,23 @@ enyo.kind({
 			}
 		}
 		return published;
+	},
+		/**
+	 * List the functions of the kind
+	 * @return a list of functions names
+	 * properties
+	 */
+	getFunctions: function() {
+		this.checkDefAvail();
+		var functions = [];
+		
+		var obj = this.definition.properties;
+		for (var i=0; i<obj.length; i++) {
+			var p = obj[i];
+			if (p.value[0].name === 'function') {
+				functions.push(p.name);
+			}
+		}
+		return functions;
 	}
 });
