@@ -1,6 +1,7 @@
 {
     "globals": {
         "enyo": false,
+        "$L": false,
         "analyzer": true
     },
     "evil": false,

@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "TestSuiteTest",
-	kind: enyo.TestSuite,	
-	
+	kind: enyo.TestSuite,
+
 	beforeEach: function() {
 		this.didBefore=true;
 	},
@@ -38,8 +38,9 @@ enyo.kind({
 		this.finish();
 	},
 	testAfterPt2: function() {
+		var result;
 		if(!window.afterWasExecuted) {
-			var result = "After was not executed in pt1.";
+			result = "After was not executed in pt1.";
 		}
 		this.finish(result);
 	},
@@ -64,10 +65,11 @@ enyo.kind({
 		delete window.startedPt1;
 	},
 	testAsyncFinishPt2: function() {
+		var result;
 		if(window.startedPt1) {
-			var result = "Pt1 did not complete yet.";
+			result = "Pt1 did not complete yet.";
 		}
 		this.finish(result);
 	}
-	
+
 });
