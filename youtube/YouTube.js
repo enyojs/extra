@@ -1,3 +1,4 @@
+/* global YT */
 enyo.kind({
 	name: "enyo.YouTube",
 	kind: "Control",
@@ -21,7 +22,8 @@ enyo.kind({
 		},
 		processResponse: function(inSender, inResponse) {
 			var videos = inResponse && inResponse.feed && inResponse.feed.entry || [];
-			for (var i=0, l; v=videos[i]; i++) {
+			var v;
+			for (var i=0, l; (v=videos[i]); i++) {
 				l = v.id.$t;
 				v.id = l.substring(l.lastIndexOf("/")+1);
 				v.title = v.title.$t;
@@ -95,4 +97,4 @@ enyo.kind({
 });
 
 // global callback called when script is processed
-onYouTubePlayerAPIReady = enyo.YouTube.apiReady;
+window.onYouTubePlayerAPIReady = enyo.YouTube.apiReady;

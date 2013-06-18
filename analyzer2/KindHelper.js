@@ -74,7 +74,7 @@ enyo.kind({
 	getFunctions: function() {
 		this.checkDefAvail();
 		var functions = [];
-		
+
 		var obj = this.definition.properties;
 		for (var i=0; i<obj.length; i++) {
 			var p = obj[i];
@@ -138,5 +138,5 @@ enyo.kind({
 			}
 		}
 		return declared;
-	},
+	}
 });

@@ -1,8 +1,10 @@
 {
     "globals": {
         "enyo": false,
+        "$L": false,
         "analyzer": true
     },
+    "es3": true,
     "evil": false,
     "regexdash": true,
     "browser": true,
