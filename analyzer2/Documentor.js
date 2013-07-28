@@ -28,6 +28,9 @@ enyo.kind({
 			else if (node.token == "enyo.kind" && it.future.kind == "association") {
 				obj = this.cook_kind(it);
 			}
+			else if (node.token == "enyo.singleton" && it.future.kind == "association") {
+				obj = this.cook_singleton(it);
+			}
 			else if (node.kind == "assignment") {
 				obj = this.cook_assignment(it);
 			}
@@ -109,6 +112,11 @@ enyo.kind({
 		if (this.debug) {
 			this.logMethodExit(it);
 		}
+		return obj;
+	},
+	cook_singleton: function(inNodes) {
+		var obj = this.cook_kind(inNodes);
+		obj.type = "singleton";
 		return obj;
 	},
 	cook_block: function(inNodes) {
