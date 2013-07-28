@@ -32,18 +32,24 @@ enyo.kind({
 				obj = this.cook_assignment(it);
 			}
 			else if (node.kind == "association") {
-				// closure? [( [function] [()] [{...}] [()]) ]
-				if (node.children && node.children.length == 1 && node.children[0].kind == "function") {
+				// closure? [( [function] [ (...) ] [ {...} ] ) [ () ] ]
+				// closure? [( [function] [ (...) ] [ {...} ] [ () ] ) ]
+				var fn, body, objs;
+				if (node.children &&
+					(node.children.length == 1 && node.children[0].kind == "function") ||
+					(node.children.length == 2 && node.children[0].kind == "function" && node.children[1].kind == "association")) {
 					// closure
-					var fn = node.children[0];
+					fn = node.children[0];
 					if (fn.children && fn.children.length == 2) {
-						var body = fn.children[1];
-						var objs = this.walk(new analyzer.Iterator(body.children));
+						body = fn.children[1];
+						objs = this.walk(new analyzer.Iterator(body.children));
 						// add whatever was in the closure to the main object list
 						objects = objects.concat(objs);
 					}
-					// skip the closure invocation [()]
-					it.next();
+					// skip the closure invocation [()] in the form where that follows parens
+					if (node.children.length == 1) {
+						it.next();
+					}
 				}
 			}
 			if (obj) {
@@ -284,13 +290,11 @@ enyo.kind({
 		}
 	},
 	extractPragmas: function(inString) {
-		var pragmaRx = /^[*\s]*@[\S\s]*/g,
+		var pragmaRx = /^[*\s]*@\s*(\S*)\s*/g,
 			pragmas = [],
 			s = inString;
 		if (s.length) {
-			s = inString.replace(pragmaRx, function(m) {
-				var p = m.slice(2);
-				//console.log("found pragma: [" + p + "]");
+			s = inString.replace(pragmaRx, function(m, p) {
 				pragmas.push(p);
 				return "";
 			});
