@@ -208,16 +208,9 @@ enyo.kind({
 		this.pushToken("comment");
 	},
 	doCComment: function() {
-		this.tokenize(2);
-		var n = 1;
-		// searching for /* | */
-		while (n && (this.search(/\/\*|\*\//g))) {
-			// if we see /* add one to the nesting level,
-			// if we see */ substract one from the nesting level
-			n += (this.d == "/" ? 1 : (this.d == "*" ? -1 : 0));
-			// in either case, add the two characters to the token
-			this.tokenize(2);
-		}
+		this.tokenize(2);    // consume '/*'
+		this.search(/\*\//); // search for next '*/'
+		this.tokenize(2);    // consume '*/'
 		this.pushToken("comment");
 	},
 	doString: function() {
