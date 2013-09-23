@@ -236,6 +236,11 @@ enyo.kind({
 			// the array of properties in the block value
 			var p$ = c$.value[0].properties;
 			for (var i=0, p; (p=p$[i]); i++) {
+				if (p.type !== 'block') {
+					var errMsg = "Error in kind "+ o.name + ": Expected an object in component list not " + p.type + ' ' + p.token ;
+					enyo.log(errMsg);
+					throw new Error(errMsg);
+				}
 				// each p is a config block, find the 'name' and 'kind' properties, if they exist
 				var n = analyzer.Documentor.findByName(p.properties, "name");
 				if (n) {
