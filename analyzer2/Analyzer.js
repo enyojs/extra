@@ -89,6 +89,9 @@ enyo.kind({
 					this.doError(error) ;
 				}
 			})
+			.error(this, function(inSender, inError) {
+				this.doError(inError);
+			})
 		;
 	},
 	//* @protected
