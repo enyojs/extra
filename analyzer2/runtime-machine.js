@@ -84,6 +84,10 @@ analyzer.runtimeMachine = {
 	},
 	_error: function(inPath) {
 		//console.log("error [" + inPath + "]");
+		// another hack: cannot bubble up errors from here. This
+		// object is isolated from the analyser by enyo.loader. Have
+		// to send a signal for the error to show up on user's screen
+		enyo.Signals.send("onAnalyserError",{ msg : "Failed to load " + inPath } );
 		this._continue();
 	}
 };
