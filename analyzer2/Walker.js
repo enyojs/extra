@@ -32,6 +32,9 @@ enyo.kind({
 
 			Not SURE of the impacts especially if the enyo.loader is invoked
 			to load some more application files while the analysis is ongoing.
+
+			Not SURE either how loading will behave *after* analysis is done: enyo.loader
+			is not restored...
 		 */
 		enyo.loader = this.loader;
 
