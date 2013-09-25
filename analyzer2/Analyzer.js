@@ -3,7 +3,8 @@ enyo.kind({
 	kind: "Component",
 	debug: false,
 	events: {
-		onIndexReady: ""
+		onIndexReady: "",
+		onError: ""
 	},
 	create: function() {
 		this.index = new analyzer.Indexer();
@@ -68,6 +69,9 @@ enyo.kind({
 	},
 	//* @protected
 	walkFinished: function(inModules, inDesigns) {
+		if (this.debug) {
+			enyo.log("analyzer.Analyzer.walkFinished called");
+		}
 		this.read(inModules, inDesigns);
 	},
 	//* @protected
@@ -75,9 +79,18 @@ enyo.kind({
 		new analyzer.Reader()
 			.go({modules: inModules, designs: inDesigns})
 			.response(this, function(inSender, inData) {
-				this.indexModules(inData.modules);
-				this.indexDesigns(inData.designs);
-				this.doIndexReady();
+				try {
+					this.indexModules(inData.modules); // this may throw an error
+					this.indexDesigns(inData.designs);
+					this.doIndexReady();
+				}
+				catch (error) {
+					this.log("Analysis failed with: ",error.toString() );
+					this.doError(error) ;
+				}
+			})
+			.error(this, function(inSender, inError) {
+				this.doError(inError);
 			})
 		;
 	},
