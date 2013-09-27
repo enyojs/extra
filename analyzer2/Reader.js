@@ -23,7 +23,6 @@ enyo.kind({
 		});
 	},
 	fileLoaded: function(inFile, inCode, xhr) {
-		enyo.log(xhr.status);
 		if (xhr.status >= 200 && xhr.status < 300) {
 			this.addFile(inFile, inCode);
 		}
