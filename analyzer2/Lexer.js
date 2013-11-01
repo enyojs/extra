@@ -104,7 +104,7 @@ enyo.kind({
 	},
 	buildPattern: function() {
 		// match an inline regex
-		//var rregex = "/[^*/](?:\\/|[^/])+?/";
+		var rregex = "\\/[^\/*[](?:[^\\/\\\\\\r\n]|\\\\.)+\\/\\w*";
 		//
 		// matches double-quoted string that may contain escaped double-quotes
 		var rstring1 = '"(?:\\\\"|[^"])*?"';
@@ -136,9 +136,9 @@ enyo.kind({
 		//
 		// these are the patterns to match
 		// match escape sequences \" and \/ first to help defray confusion
-		var matches = ["\\\\\"|\\\\/", rstring, rkeys, '\\/\\/', '\\/\\*', rsymbols, "\\s"];
+		var matches = ["\\\\\"|\\\\/", rregex, rstring, rkeys, '\\/\\/', '\\/\\*', rsymbols, "\\s"];
 		// these are the matching methods corresponding to the patterns above
-		this.matchers = ["doSymbol", "doString", "doKeyword", "doLineComment", "doCComment", "doSymbol", "doWhitespace"];
+		this.matchers = ["doSymbol", "doRegex", "doString", "doKeyword", "doLineComment", "doCComment", "doSymbol", "doWhitespace"];
 		//
 		//
 		// construct the master regex as a union of the patterns above
@@ -215,5 +215,8 @@ enyo.kind({
 	},
 	doString: function() {
 		this.pushToken("string", this.m[0].length);
+	},
+	doRegex: function() {
+		this.pushToken("regex", this.m[0].length);
 	}
 });
