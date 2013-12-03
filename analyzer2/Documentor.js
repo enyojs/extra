@@ -212,6 +212,7 @@ enyo.kind({
 		var node = it.value;
 		var obj = this.make("expression", node);
 		obj.commaTerminated = node.commaTerminated;
+		obj.block = {start: node.children[1].start, end: node.children[1].end};
 		obj['arguments'] = enyo.map(node.children[0].children, function(n) { return n.token; });
 		if (this.debug) {
 			this.logMethodExit(it);
