@@ -25,10 +25,10 @@ enyo.kind({
 			if (node.kind == "comment") {
 				this.cook_comment(node.token);
 			}
-			else if (node.token == "enyo.kind" && it.future.kind == "association") {
+			else if (node.token == "enyo.kind" && it.future && it.future.kind == "association") {
 				obj = this.cook_kind(it);
 			}
-			else if (node.token == "enyo.singleton" && it.future.kind == "association") {
+			else if (node.token == "enyo.singleton" && it.future && it.future.kind == "association") {
 				obj = this.cook_singleton(it);
 			}
 			else if (node.kind == "assignment") {
@@ -50,7 +50,7 @@ enyo.kind({
 						objects = objects.concat(objs);
 					}
 					// skip the closure invocation [()] in the form where that follows parens
-					if (node.children.length == 1) {
+					if (node.children.length == 1 && it.future && it.future.kind == "association") {
 						it.next();
 					}
 				}
