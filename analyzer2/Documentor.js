@@ -192,7 +192,17 @@ enyo.kind({
 				obj = this.make("expression", node);
 				var t = node.token;
 				while (it.next()) {
-					t += it.value.token;
+					if (it.value.kind === "association") {
+						// FIXME: hack to store full code string of
+						// the assignment in a token. This is a proof
+						// of concept. It should be reworked to avoid
+						// storing a complex string in a token
+						var assocArgs = [];
+						enyo.map(it.value.children, function(n) { assocArgs.push(n.token); });
+						t += "(" + assocArgs.join(', ') + ")";
+					} else {
+						t += it.value.token;
+					}
 				}
 				obj.token = t;
 				if (this.debug) {
