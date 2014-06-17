@@ -1,7 +1,7 @@
 {
 	"name": "enyo-extra",
 	"version": "2.5.0",
-	"main":"package.js",
+	"main":"version.js",
 	"dependencies": {
 		"enyo":"2.5.0"
 	},
