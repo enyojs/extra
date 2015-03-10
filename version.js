@@ -1,3 +1,3 @@
 if (enyo && enyo.version) {
-	enyo.version.extra = " 2.5.4-pre.11";
+	enyo.version.extra = "2.5.4-pre.11";
 }
