@@ -1,0 +1,107 @@
+{
+  "id": "com.examples.apps.myapp",
+  "name": "extra",
+  "version": "0.0.1",
+  "title": "Example: My Application",
+  "description": "My application description...",
+  "author": {
+    "name": "An Example Company",
+    "href": "http://www.example.com"
+  },
+  "providers": {
+    "phonegap": {
+      "enabled": false,
+      "autoGenerateXML": true,
+      "minification": true,
+      "features": {
+        "battery": false,
+        "camera": false,
+        "contact": false,
+        "file": false,
+        "geolocation": false,
+        "media": false,
+        "network": false,
+        "notification": false,
+        "device": false
+      },
+      "preferences": {
+        "phonegap-version": "3.1.0",
+        "orientation": "both",
+        "target-device": "universal",
+        "fullscreen": "false",
+        "android-installLocation": "internalOnly",
+        "android-minSdkVersion": "7",
+        "android-targetSdkVersion": "None",
+        "android-maxSdkVersion": "None",
+        "android-windowSoftInputMode": "stateVisible",
+        "splash-screen-duration": "5000",
+        "load-url-timeout": "20000",
+        "webviewbounce": "true",
+        "prerendered-icon": "false",
+        "ios-statusbarstyle": "black-opaque",
+        "detect-data-types": "true",
+        "exit-on-suspend": "false",
+        "show-splash-screen-spinner": "false",
+        "auto-hide-splash-screen": "true",
+        "disable-cursor": "false"
+      },
+      "icon": {
+        "sharedConfiguration": {
+          "src": "",
+          "role": "default"
+        },
+        "android": {
+          "src": "",
+          "density": ""
+        },
+        "ios": {
+          "src": "",
+          "height": "",
+          "width": ""
+        },
+        "winphone": {
+          "src": ""
+        },
+        "blackberry": {
+          "src": ""
+        },
+        "webos": {
+          "src": ""
+        }
+      },
+      "splashScreen": {
+        "sharedConfiguration": {
+          "src": "",
+          "role": "default"
+        },
+        "android": {
+          "src": "",
+          "density": ""
+        },
+        "ios": {
+          "src": "",
+          "height": "",
+          "width": ""
+        },
+        "winphone": {
+          "src": ""
+        },
+        "blackberry": {
+          "src": ""
+        },
+        "webos": {
+          "src": ""
+        }
+      },
+      "plugins": {},
+      "access": {
+        "origin": ""
+      },
+      "targets": {},
+      "appId": ""
+    }
+  },
+  "preview": {
+    "top_file": "/debug.html"
+  }
+}
