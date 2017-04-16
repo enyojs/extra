@@ -1,0 +1,14 @@
+{
+	"name": "enyo-extra",
+	"version": "2.5.0",
+	"main":"version.js",
+	"dependencies": {
+		"enyo":"2.5.0"
+	},
+	"ignore": [
+		".jshintrc",
+		".travis.yml",
+		".gitignore",
+		".jshintignore"
+	]
+}
